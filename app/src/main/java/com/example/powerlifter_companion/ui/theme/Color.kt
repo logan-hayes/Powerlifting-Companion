@@ -2,6 +2,8 @@ package com.example.powerlifter_companion.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+val PrimaryRed = Color(0xFF8F0404)
+val BackgroundGray = Color(0xFF181818)
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
 val Pink80 = Color(0xFFEFB8C8)
