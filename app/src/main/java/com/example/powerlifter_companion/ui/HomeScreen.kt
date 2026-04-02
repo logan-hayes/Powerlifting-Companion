@@ -226,7 +226,7 @@ fun Branding(modifier: Modifier = Modifier){
                 modifier = Modifier.size(80.dp)
             )
 
-            Spacer(modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Powerlifter's Companion",
@@ -257,6 +257,7 @@ fun HomeScreen() {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top
         ) {
+
             TopGreeting()
             Spacer(modifier = Modifier.height(24.dp))
             NextWorkoutCard()
