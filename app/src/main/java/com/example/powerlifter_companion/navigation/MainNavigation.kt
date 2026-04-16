@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import com.example.powerlifter_companion.ui.BlockDetailUI
 import com.example.powerlifter_companion.ui.Components.BottomBar
 import com.example.powerlifter_companion.ui.Components.topBarHome
 import com.example.powerlifter_companion.ui.PerformanceHeader
@@ -43,7 +44,7 @@ fun Scaffolding() {
             when (selectedIndex.value) {
                 0 -> HomeScreen()
                 1 -> PerformanceUi()
-                2 -> blockUi()
+                2 -> BlockDetailUI()
                 3 -> profileUi()
             }
         }
