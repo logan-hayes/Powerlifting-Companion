@@ -34,7 +34,9 @@ data class PostWorkout(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "post_workout_id")
     val postWorkoutId: Int,
-    @ColumnInfo(name = "block_id")
-    val blockId: Long = 0,
-    val completedTimeStamp: Long
+    @ColumnInfo(name = "workout_id")
+    val workoutId: Long,
+    val completedTimeStamp: Long,
+    val completedAsPlanned: Boolean,
+    val notes: String? = null
 )
