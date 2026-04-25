@@ -34,5 +34,7 @@ data class TrainingBlocks(
     @ColumnInfo(name = "created_at")
     val createdAt: String,
     @ColumnInfo(name = "updated_at")
-    val updatedAt: String
+    val updatedAt: String,
+    @ColumnInfo(name = "week_length")
+    val weekLength: Int
 )

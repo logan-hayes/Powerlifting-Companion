@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 interface TrainingBlocksDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTrainingBlock(trainingBlock: TrainingBlocks)
+    suspend fun insertTrainingBlock(trainingBlock: TrainingBlocks): Long
 
     @Update
     suspend fun updateTrainingBlock(trainingBlock: TrainingBlocks)
@@ -23,7 +23,7 @@ interface TrainingBlocksDao {
     suspend fun deleteTrainingBlock(trainingBlock: TrainingBlocks)
 
     @Query("SELECT * FROM training_blocks WHERE training_block_id = :trainingBlockId")
-    suspend fun getTrainingBlock(trainingBlockId: Long): TrainingBlocks
+        fun getTrainingBlock(trainingBlockId: Long): Flow<TrainingBlocks>
 
     @Query("SELECT * FROM training_blocks")
     fun getAllTrainingBlocks(): Flow<List<TrainingBlocks>>

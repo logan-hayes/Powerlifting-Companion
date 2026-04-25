@@ -16,7 +16,7 @@ interface WorkoutDao {
     suspend fun insertWorkout(workout: Workout)
 
     @Update
-    suspend fun updatedWorkout(workout: Workout)
+    suspend fun updateWorkout(workout: Workout)
 
     @Delete
     suspend fun deleteWorkout(workout: Workout)
