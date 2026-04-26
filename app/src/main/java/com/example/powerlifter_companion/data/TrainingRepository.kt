@@ -67,7 +67,14 @@ class TrainingRepository(
     suspend fun deleteWorkout(workout: Workout) =
         workoutDao.deleteWorkout(workout)
 
-    //Exercise Specific
+    suspend fun createWorkoutInWeek(workout: Workout) =
+        workoutDao.insertWorkout(workout)
+
+    //Exercise Specific//
+
+    suspend fun addExerciseToWorkout(exercise: Exercise) =
+        exerciseDao.insertExercise(exercise)
+
     fun getExercisesInWorkout(workoutId: Long) =
         exerciseDao.getAllExercisesInWorkout(workoutId)
 

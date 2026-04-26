@@ -22,5 +22,11 @@ class ExerciseRepository(
 
     fun getByMuscleGroup(muscleGroup: MuscleGroup) =
         exerciseDefinitionDao.getExerciseDefinitionsByMuscleGroup(muscleGroup)
+
+    suspend fun addExerciseDefinition(exercise: ExerciseDefinition) =
+        exerciseDefinitionDao.insertExerciseDefinition(exercise)
+
+    suspend fun deleteExerciseDefinition(exercise: ExerciseDefinition) =
+        exerciseDefinitionDao.DeleteExerciseDefinition(exercise)
 }
 

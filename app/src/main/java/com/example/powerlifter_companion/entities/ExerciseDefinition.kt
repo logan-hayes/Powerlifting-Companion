@@ -17,7 +17,7 @@ data class ExerciseDefinition(
     val exerciseDefinitionID: Int = 0,
 
     val name: String,
-    val category: ExerciseCategory,
+    val category: ExerciseCategory? = null,
     val muscleGroup: MuscleGroup? = null,
     val isCustom: Boolean = false)
     {
