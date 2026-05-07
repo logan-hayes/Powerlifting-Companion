@@ -1,11 +1,11 @@
 package com.example.powerlifter_companion.data
 
-import androidx.room3.Dao
-import androidx.room3.Delete
-import androidx.room3.Insert
-import androidx.room3.OnConflictStrategy
-import androidx.room3.Query
-import androidx.room3.Update
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.example.powerlifter_companion.entities.Users
 import kotlinx.coroutines.flow.Flow
 
@@ -16,7 +16,7 @@ interface UsersDao {
     suspend fun insertUser(user: Users): Long
 
     @Update
-    suspend fun updateUser(users:Users)
+    suspend fun updateUser(users: Users)
 
     @Delete
     suspend fun deleteUsers(user: Users)

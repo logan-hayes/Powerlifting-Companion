@@ -1,12 +1,13 @@
 package com.example.powerlifter_companion.entities
 
-import androidx.room3.ColumnInfo
-import androidx.room3.Entity
-import androidx.room3.ForeignKey
-import androidx.room3.Index
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
-
-@Entity(tableName = "user_settings",
+@Entity(
+    tableName = "user_settings",
     foreignKeys = [
         ForeignKey(
             entity = Users::class,
@@ -21,6 +22,9 @@ import androidx.room3.Index
     ]
 )
 data class UserSettings(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+
     @ColumnInfo(name = "language")
     val language: String = "en-US",
     val darkTheme: Boolean = false,

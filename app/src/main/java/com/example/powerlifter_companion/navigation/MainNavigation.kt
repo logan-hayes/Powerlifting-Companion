@@ -17,9 +17,14 @@ import com.example.powerlifter_companion.ui.Components.topBarHome
 import com.example.powerlifter_companion.ui.PerformanceHeader
 import com.example.powerlifter_companion.ui.blockHeader
 import com.example.powerlifter_companion.ui.profileHeader
+import com.example.powerlifter_companion.viewmodel.ExerciseViewModel
+import com.example.powerlifter_companion.viewmodel.TrainingViewModel
 
 @Composable
-fun Scaffolding() {
+fun Scaffolding(
+    trainingViewModel: TrainingViewModel,
+    exerciseViewModel: ExerciseViewModel
+) {
     val selectedIndex = remember { mutableStateOf(0) }
     Scaffold(
         topBar = {
