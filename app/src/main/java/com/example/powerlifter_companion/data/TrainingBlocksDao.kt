@@ -1,12 +1,11 @@
 package com.example.powerlifter_companion.data
 
-import androidx.room3.Dao
-import androidx.room3.Delete
-import androidx.room3.Insert
-import androidx.room3.OnConflictStrategy
-import androidx.room3.Query
-import androidx.room3.Update
-import com.example.powerlifter_companion.entities.Users
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.example.powerlifter_companion.entities.TrainingBlocks
 import kotlinx.coroutines.flow.Flow
 
@@ -22,9 +21,9 @@ interface TrainingBlocksDao {
     @Delete
     suspend fun deleteTrainingBlock(trainingBlock: TrainingBlocks)
 
-    @Query("SELECT * FROM training_blocks WHERE training_block_id = :trainingBlockId")
-        fun getTrainingBlock(trainingBlockId: Long): Flow<TrainingBlocks>
+    @Query("SELECT * FROM training_block WHERE block_id = :trainingBlockId")
+    fun getTrainingBlock(trainingBlockId: Long): Flow<TrainingBlocks>
 
-    @Query("SELECT * FROM training_blocks")
+    @Query("SELECT * FROM training_block")
     fun getAllTrainingBlocks(): Flow<List<TrainingBlocks>>
 }

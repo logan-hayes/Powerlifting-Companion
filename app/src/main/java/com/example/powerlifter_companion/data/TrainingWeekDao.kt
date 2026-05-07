@@ -1,33 +1,32 @@
 package com.example.powerlifter_companion.data
 
-import androidx.room3.Dao
-import androidx.room3.Delete
-import androidx.room3.Insert
-import androidx.room3.OnConflictStrategy
-import androidx.room3.Query
-import androidx.room3.Update
-import com.example.powerlifter_companion.entities.TrainingBlocks
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.example.powerlifter_companion.entities.TrainingWeek
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface TrainingWeekDao{
+interface TrainingWeekDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTrainingWeek(trainingWeek: TrainingWeek)
 
     @Update
-    suspend fun updateTrainingWeek(trainingBlock:TrainingWeek)
+    suspend fun updateTrainingWeek(trainingWeek: TrainingWeek)
 
     @Delete
     suspend fun deleteTrainingWeek(trainingWeek: TrainingWeek)
 
     @Query("SELECT * FROM training_week WHERE training_week_id = :trainingWeekId")
-    fun  getTrainingWeek(trainingWeekId: Long): TrainingWeek?
+    suspend fun getTrainingWeek(trainingWeekId: Long): TrainingWeek?
 
     @Query("SELECT * FROM training_week WHERE block_id = :trainingBlockId")
     fun getAllTrainingWeeksInBlock(trainingBlockId: Long): Flow<List<TrainingWeek>>
 
     @Query("DELETE FROM training_week WHERE block_id = :trainingBlockId")
-    fun deleteWeeksForBlock(trainingBlockId: Long): Flow<TrainingBlocks>
+    suspend fun deleteWeeksForBlock(trainingBlockId: Long)
 }

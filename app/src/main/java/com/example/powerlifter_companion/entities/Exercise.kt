@@ -1,22 +1,30 @@
 package com.example.powerlifter_companion.entities
 
-/**
- * @author Logan Hayes
- *
- *
- *
- * */
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
-
-import androidx.room3.Entity
-import androidx.room3.PrimaryKey
-
-@Entity(tableName = "exercise")
+@Entity(
+    tableName = "exercise",
+    foreignKeys = [
+        ForeignKey(
+            entity = Workout::class,
+            parentColumns = ["workout_id"],
+            childColumns = ["workoutId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [
+        Index(value = ["workoutId"])
+    ]
+)
 data class Exercise(
-
     @PrimaryKey(autoGenerate = true)
     var exerciseID: Int = 0,
 
+    val workoutId: Long,
     val exerciseDefinition: Int,
 
     val sets: Int,

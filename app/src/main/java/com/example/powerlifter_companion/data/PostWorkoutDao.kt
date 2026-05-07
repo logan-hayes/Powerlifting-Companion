@@ -1,22 +1,22 @@
 package com.example.powerlifter_companion.data
 
-import androidx.room3.Dao
-import androidx.room3.Delete
-import androidx.room3.Insert
-import androidx.room3.Query
-
-import kotlinx.coroutines.flow.Flow
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.example.powerlifter_companion.entities.PostWorkout
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PostWorkoutDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPostWorkout(postWorkout: PostWorkout)
 
     @Delete
-    suspend fun deletePostWorkout(postWorkoutId: Long)
+    suspend fun deletePostWorkout(postWorkout: PostWorkout)
 
     @Query("SELECT * FROM post_workout WHERE workout_id = :workoutId")
-    fun getPostWorkoutByWorkoutId(workoutId: Long): Flow<PostWorkout>
+    fun getPostWorkoutByWorkoutId(workoutId: Long): Flow<PostWorkout?>
 }

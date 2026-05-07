@@ -249,14 +249,14 @@ fun HomeScreen() {
         )
     )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(gradientBlack)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.Top
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBlack)
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Top
+    ) {
 
             TopGreeting()
             Spacer(modifier = Modifier.height(24.dp))

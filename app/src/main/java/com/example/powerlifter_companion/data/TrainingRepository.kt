@@ -44,7 +44,7 @@ class TrainingRepository(
     fun getWeeksInBlock(blockId: Long) =
         trainingWeekDao.getAllTrainingWeeksInBlock(blockId)
 
-    fun getWeekById(trainingWeekId: Long) =
+    suspend fun getWeekById(trainingWeekId: Long) =
         trainingWeekDao.getTrainingWeek(trainingWeekId)
 
     suspend fun updateTrainingWeek(trainingWeek: TrainingWeek) =
@@ -58,7 +58,7 @@ class TrainingRepository(
     fun getWorkoutsInWeek(trainingWeekId: Long) =
         workoutDao.getAllWorkoutsInTrainingWeek(trainingWeekId)
 
-    fun getWorkoutById(workoutId: Long) =
+    suspend fun getWorkoutById(workoutId: Long) =
         workoutDao.getWorkoutById(workoutId)
 
     suspend fun updateWorkout(workout: Workout) =
@@ -78,7 +78,7 @@ class TrainingRepository(
     fun getExercisesInWorkout(workoutId: Long) =
         exerciseDao.getAllExercisesInWorkout(workoutId)
 
-    fun getExerciseById(exerciseId: Long) =
+    suspend fun getExerciseById(exerciseId: Long) =
         exerciseDao.getExerciseById(exerciseId)
 
     suspend fun updateExercise(exercise: Exercise) =
