@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,18 +22,29 @@ import androidx.compose.ui.text.font.FontWeight
 import com.example.powerlifter_companion.ui.theme.BackgroundGray
 import com.example.powerlifter_companion.ui.theme.PrimaryRed
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import com.example.powerlifter_companion.viewmodel.ExerciseViewModel
 
 
 
 @Composable
-fun CreateBlockUI(
-    exerciseViewModel: ExerciseViewModel)
-{
+fun CreateBlockUI() {
     val blockGradient = Brush.verticalGradient(
         colors = listOf(BackgroundGray, PrimaryRed)
     )
+
+    var blockName by remember { mutableStateOf("") }
+    var selectedLength by remember { mutableStateOf<Int?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -40,55 +52,102 @@ fun CreateBlockUI(
             .padding(20.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top
-    ){
+    ) {
         Text(
-            text = "Meet Prep Block",
+            text = "Create Training Block",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = Color.White)
+            color = Color.White
+        )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Week 2 daye 1",
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.White.copy(alpha = 0.88f))
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        BlockTableHeader()
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        BlockTableRow(
-            exercise = "SB Squats",
-            sets = "3",
-            reps = "7",
-            weight = "N/A",
-            rpe = "8",
-            notes = "pause 1 second at the bottom"
-
+            text = "Set up a new training cycle",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White.copy(alpha = 0.75f)
         )
 
-        BlockTableRow(
-            exercise = "Bench Press",
-            sets = "5",
-            reps = "5",
-            weight = "275",
-            rpe = "N/A",
-            notes = "pause 1 second at the bottom"
+        Spacer(modifier = Modifier.height(24.dp))
 
-        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(22.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF1E1E1E).copy(alpha = 0.92f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
+                Text(
+                    text = "Block Name",
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold
+                )
 
-        BlockTableRow(
-            exercise = "Seated Good-Mornings",
-            sets = "3",
-            reps = "7",
-            weight = "null",
-            rpe = "8",
-            notes = "pause 1 second at the bottom"
+                Spacer(modifier = Modifier.height(8.dp))
 
-        )
+                OutlinedTextField(
+                    value = blockName,
+                    onValueChange = { blockName = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Example: Meet Prep Block") },
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(22.dp))
+
+                Text(
+                    text = "Block Length",
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(4, 6, 8, 12).forEach { weeks ->
+                        Button(
+                            onClick = { selectedLength = weeks },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor =
+                                    if (selectedLength == weeks) PrimaryRed
+                                    else Color.DarkGray
+                            )
+                        ) {
+                            Text("$weeks")
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = selectedLength?.let { "$it weeks selected" } ?: "No length selected",
+                    color = Color.White.copy(alpha = 0.65f)
+                )
+
+                Spacer(modifier = Modifier.height(26.dp))
+
+                Button(
+                    onClick = { },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PrimaryRed
+                    )
+                ) {
+                    Text("Create Block")
+                }
+            }
+        }
     }
 }
 

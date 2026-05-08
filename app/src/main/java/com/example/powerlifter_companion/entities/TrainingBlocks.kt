@@ -1,10 +1,10 @@
 package com.example.powerlifter_companion.entities
 
-import androidx.room3.ColumnInfo
-import androidx.room3.Entity
-import androidx.room3.ForeignKey
-import androidx.room3.Index
-import androidx.room3.PrimaryKey
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "training_block",
     foreignKeys = [
@@ -30,11 +30,11 @@ data class TrainingBlocks(
     @ColumnInfo(name = "blockName")
     val blockName: String,
     @ColumnInfo(name = "start_date")
-    val startDate: String,
+    val startDate: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "created_at")
-    val createdAt: String,
+    val createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "updated_at")
-    val updatedAt: String,
+    val updatedAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "week_length")
     val weekLength: Int
 )

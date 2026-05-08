@@ -1,6 +1,6 @@
 package com.example.powerlifter_companion.util
 
-import androidx.room3.TypeConverter
+import androidx.room.TypeConverter
 import com.example.powerlifter_companion.entities.ExerciseCategory
 import com.example.powerlifter_companion.entities.MuscleGroup
 

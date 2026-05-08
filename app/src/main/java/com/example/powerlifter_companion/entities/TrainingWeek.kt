@@ -1,18 +1,18 @@
 package com.example.powerlifter_companion.entities
 
-import androidx.room3.ColumnInfo
-import androidx.room3.Entity
-import androidx.room3.ForeignKey
-import androidx.room3.Index
-import androidx.room3.PrimaryKey
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "training_week",
     foreignKeys = [
         ForeignKey(
             entity = TrainingBlocks::class,
-            parentColumns = ["blockId"],
-            childColumns = ["blockId"],
+            parentColumns = ["block_id"],
+            childColumns = ["block_id"],
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         )

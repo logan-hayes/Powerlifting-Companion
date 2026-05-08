@@ -1,11 +1,11 @@
 package com.example.powerlifter_companion.data
 
-import androidx.room3.Dao
-import androidx.room3.Delete
-import androidx.room3.Insert
-import androidx.room3.OnConflictStrategy
-import androidx.room3.Query
-import androidx.room3.Update
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.example.powerlifter_companion.entities.Workout
 import kotlinx.coroutines.flow.Flow
 
@@ -21,11 +21,9 @@ interface WorkoutDao {
     @Delete
     suspend fun deleteWorkout(workout: Workout)
 
-    @Query("SELECT * FROM workout " +
-            "WHERE training_week_id = :trainingWeekId" +
-            "Order By workout_order ASC")
+    @Query("SELECT * FROM workout WHERE training_week_id = :trainingWeekId ORDER BY day_number ASC")
     fun getAllWorkoutsInTrainingWeek(trainingWeekId: Long): Flow<List<Workout>>
 
     @Query("SELECT * FROM workout WHERE workout_id = :workoutId")
-    fun getWorkoutById(workoutId: Long): Flow<Workout>
+    fun getWorkoutById(workoutId: Long): Flow<Workout?>
 }

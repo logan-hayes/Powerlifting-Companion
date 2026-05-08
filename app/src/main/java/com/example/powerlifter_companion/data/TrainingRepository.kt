@@ -5,16 +5,14 @@ import com.example.powerlifter_companion.entities.TrainingBlocks
 import com.example.powerlifter_companion.entities.TrainingWeek
 import com.example.powerlifter_companion.entities.Workout
 
-
 class TrainingRepository(
     private val trainingBlocksDao: TrainingBlocksDao,
     private val trainingWeekDao: TrainingWeekDao,
     private val workoutDao: WorkoutDao,
     private val exerciseDao: ExerciseDao
-){
+) {
 
-    //Block specific//
-
+    // Block specific
     fun getAllTrainingBlocks() =
         trainingBlocksDao.getAllTrainingBlocks()
 
@@ -27,7 +25,7 @@ class TrainingRepository(
     suspend fun deleteTrainingBlock(trainingBlock: TrainingBlocks) =
         trainingBlocksDao.deleteTrainingBlock(trainingBlock)
 
-    //Creates new trainingBlock and associated Weeks
+    // Creates new trainingBlock and associated Weeks
     suspend fun createTrainingBlock(trainingBlock: TrainingBlocks) {
         val blockId = trainingBlocksDao.insertTrainingBlock(trainingBlock)
 
@@ -35,16 +33,17 @@ class TrainingRepository(
             trainingWeekDao.insertTrainingWeek(
                 TrainingWeek(
                     blockId = blockId,
-                    weekNumber = weekNumber))
+                    weekNumber = weekNumber
+                )
+            )
         }
     }
 
-    //Week specific//
-
+    // Week specific
     fun getWeeksInBlock(blockId: Long) =
         trainingWeekDao.getAllTrainingWeeksInBlock(blockId)
 
-    fun getWeekById(trainingWeekId: Long) =
+    suspend fun getWeekById(trainingWeekId: Long) =
         trainingWeekDao.getTrainingWeek(trainingWeekId)
 
     suspend fun updateTrainingWeek(trainingWeek: TrainingWeek) =
@@ -53,8 +52,7 @@ class TrainingRepository(
     suspend fun deleteTrainingWeek(trainingWeek: TrainingWeek) =
         trainingWeekDao.deleteTrainingWeek(trainingWeek)
 
-    //Workout specific//
-
+    // Workout specific
     fun getWorkoutsInWeek(trainingWeekId: Long) =
         workoutDao.getAllWorkoutsInTrainingWeek(trainingWeekId)
 
@@ -70,8 +68,7 @@ class TrainingRepository(
     suspend fun createWorkoutInWeek(workout: Workout) =
         workoutDao.insertWorkout(workout)
 
-    //Exercise Specific//
-
+    // Exercise Specific
     suspend fun addExerciseToWorkout(exercise: Exercise) =
         exerciseDao.insertExercise(exercise)
 
@@ -86,4 +83,4 @@ class TrainingRepository(
 
     suspend fun deleteExercise(exercise: Exercise) =
         exerciseDao.deleteExercise(exercise)
-    }
+}

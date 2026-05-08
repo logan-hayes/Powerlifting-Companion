@@ -1,10 +1,10 @@
 package com.example.powerlifter_companion.entities
 
-import androidx.room3.ColumnInfo
-import androidx.room3.Entity
-import androidx.room3.ForeignKey
-import androidx.room3.Index
-import androidx.room3.PrimaryKey
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "workout",
     foreignKeys = [
@@ -24,7 +24,11 @@ data class Workout(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "workout_id")
     val workoutId: Long,
-    val notes: Long,
+    @ColumnInfo(name = "training_week_id")
+    val trainingWeekId: Long,
+    @ColumnInfo(name = "workout_name")
+    val workoutName: String,
+    val notes: String,
     @ColumnInfo(name = "day_number")
     val dayNumber: Int
 )

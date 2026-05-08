@@ -1,9 +1,10 @@
 package com.example.powerlifter_companion.entities
 
-import androidx.room3.ColumnInfo
-import androidx.room3.Entity
-import androidx.room3.ForeignKey
-import androidx.room3.Index
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
 
 @Entity(tableName = "user_settings",
@@ -21,11 +22,12 @@ import androidx.room3.Index
     ]
 )
 data class UserSettings(
+    @PrimaryKey
+    @ColumnInfo(name = "user_id")
+    val userId: Long,
     @ColumnInfo(name = "language")
     val language: String = "en-US",
     val darkTheme: Boolean = false,
-    @ColumnInfo(name = "user_id")
-    val userId: Long,
     //later change from boolean to enum
     @ColumnInfo(name = "notification_preferences")
     val notificationPreferences: Boolean,

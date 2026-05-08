@@ -27,6 +27,5 @@ class ExerciseRepository(
         exerciseDefinitionDao.insertExerciseDefinition(exercise)
 
     suspend fun deleteExerciseDefinition(exercise: ExerciseDefinition) =
-        exerciseDefinitionDao.DeleteExerciseDefinition(exercise)
+        exerciseDefinitionDao.deleteExerciseDefinition(exercise)
 }
-

@@ -7,8 +7,8 @@ package com.example.powerlifter_companion.entities
  *
  * */
 
-import androidx.room3.Entity
-import androidx.room3.PrimaryKey
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "exercise_definition")
 data class ExerciseDefinition(
