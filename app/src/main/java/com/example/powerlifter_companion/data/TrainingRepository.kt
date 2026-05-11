@@ -16,6 +16,9 @@ class TrainingRepository(
     fun getAllTrainingBlocks() =
         trainingBlocksDao.getAllTrainingBlocks()
 
+    fun getAllBlocks() =
+        trainingBlocksDao.getAllBlocks()
+
     fun getBlockById(trainingBlockId: Long) =
         trainingBlocksDao.getTrainingBlock(trainingBlockId)
 

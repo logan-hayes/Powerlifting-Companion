@@ -6,20 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "training_block",
-    foreignKeys = [
-        ForeignKey(
-            entity = Users::class,
-            parentColumns = ["user_id"],
-            childColumns = ["user_id"],
-            onDelete = ForeignKey.CASCADE,
-            onUpdate = ForeignKey.CASCADE
-        )
-    ],
-    indices = [
-        Index(value = ["user_id"])
-    ]
-)
+@Entity(tableName = "training_block")
 data class TrainingBlocks(
 
     @PrimaryKey(autoGenerate = true)

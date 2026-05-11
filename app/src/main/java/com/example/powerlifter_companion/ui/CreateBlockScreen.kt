@@ -32,12 +32,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
+import com.example.powerlifter_companion.ui.Components.ExerciseListScreen
 import com.example.powerlifter_companion.viewmodel.ExerciseViewModel
 
 
-
 @Composable
-fun CreateBlockUI() {
+fun CreateBlockUI(
+    exerciseViewModel: ExerciseViewModel
+) {
     val blockGradient = Brush.verticalGradient(
         colors = listOf(BackgroundGray, PrimaryRed)
     )
@@ -149,6 +151,8 @@ fun CreateBlockUI() {
             }
         }
     }
+    Spacer(modifier = Modifier.height(24.dp))
+    ExerciseListScreen(exerciseViewModel)
 }
 
 @Composable
@@ -160,6 +164,8 @@ fun BlockTableRow(
     rpe: String,
     notes: String)
 {
+
+
     Row(
         modifier = Modifier
             .fillMaxWidth()

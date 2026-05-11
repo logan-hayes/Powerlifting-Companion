@@ -40,12 +40,5 @@ object ExerciseSeedData {
             muscleGroup = MuscleGroup.HAMSTRINGS,
             isCustom = false
         ),
-
-        ExerciseDefinition(
-            name = "Romanian Deadlift",
-            category = ExerciseCategory.ACCESSORY,
-            muscleGroup = MuscleGroup.HAMSTRINGS,
-            isCustom = false
-        )
     )
 }

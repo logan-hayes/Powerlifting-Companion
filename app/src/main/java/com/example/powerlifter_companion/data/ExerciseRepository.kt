@@ -28,4 +28,12 @@ class ExerciseRepository(
 
     suspend fun deleteExerciseDefinition(exercise: ExerciseDefinition) =
         exerciseDefinitionDao.deleteExerciseDefinition(exercise)
+
+    suspend fun seedExercisesIfEmpty() {
+        if (exerciseDefinitionDao.getExerciseDefinitionCount() == 0) {
+            exerciseDefinitionDao.insertExerciseDefinitionList(
+                ExerciseSeedData.defaultExercises
+            )
+        }
+    }
 }

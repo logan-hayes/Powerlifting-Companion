@@ -26,4 +26,7 @@ interface TrainingBlocksDao {
 
     @Query("SELECT * FROM training_block")
     fun getAllTrainingBlocks(): Flow<List<TrainingBlocks>>
+
+    @Query("SELECT * FROM training_block ORDER BY start_date DESC")
+    fun getAllBlocks(): Flow<List<TrainingBlocks>>
 }

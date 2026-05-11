@@ -28,6 +28,8 @@ class TrainingViewModel(
     private val _blockLength = MutableStateFlow<Int?>(null)
     val blockLength: StateFlow<Int?> = _blockLength
 
+    val trainingBlocks = trainingRepository.getAllBlocks()
+
     //Week Specific//
 
     private val _selectedTrainingWeekId = MutableStateFlow<Long?>(null)
@@ -46,6 +48,9 @@ class TrainingViewModel(
 
     private val _workoutNotes = MutableStateFlow("")
     val workoutNotes: StateFlow<String> = _workoutNotes
+
+    private val _isAddingWorkout = MutableStateFlow(false)
+    val isAddingWorkout: StateFlow<Boolean> = _isAddingWorkout
 
     //Exercise Specific//
 
@@ -73,6 +78,8 @@ class TrainingViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
+    private val _isAddingExercise = MutableStateFlow(false)
+    val isAddingExercise: StateFlow<Boolean> = _isAddingExercise
 
     val exercisesInWorkout =
         _selectedWorkoutId
@@ -89,8 +96,8 @@ class TrainingViewModel(
     val trainingWeeksInBlock =
         _selectedBlockId
             .filterNotNull()
-            .flatMapLatest { workoutId ->
-                trainingRepository.getWeeksInBlock(workoutId)
+            .flatMapLatest { blockId ->
+                trainingRepository.getWeeksInBlock(blockId)
             }
     //Block Specific//
 
@@ -112,6 +119,11 @@ class TrainingViewModel(
         }
     }
 
+    fun clearSelectedBlock() {
+        _selectedBlockId.value = null
+        _selectedTrainingWeekId.value = null
+    }
+
     fun createBlock(){
         val name = _trainingBlockName.value.trim()
         val length = _blockLength.value
@@ -129,7 +141,7 @@ class TrainingViewModel(
         viewModelScope.launch{
             trainingRepository.createTrainingBlock(
                 TrainingBlocks(
-                    userId = 0L,
+                    userId = 1L,
                     blockName = name,
                     weekLength = length
                 )
@@ -150,6 +162,19 @@ class TrainingViewModel(
 
     fun selectWorkout(workoutId: Long) {
         _selectedWorkoutId.value = workoutId
+    }
+
+    fun clearSelectedWorkout() {
+        _selectedWorkoutId.value = null
+    }
+
+    fun startAddingWorkout() {
+        _isAddingWorkout.value = true
+    }
+
+    fun cancelAddingWorkout() {
+        _isAddingWorkout.value = false
+        clearWorkoutInput()
     }
 
     fun createWorkout(){
@@ -173,13 +198,14 @@ class TrainingViewModel(
                     workoutId = 0L,
                     trainingWeekId = trainingWeekId,
                     workoutName = name,
-                    dayNumber = 1,
+                    dayNumber = _dayNumber.value ?: 1,
                     notes = notes,
                     )
             )
             _workoutName.value = ""
             _workoutNotes.value = ""
             _errorMessage.value = null
+            _isAddingWorkout.value = false
         }
     }
 
@@ -187,6 +213,10 @@ class TrainingViewModel(
         _workoutName.value = ""
         _workoutNotes.value = ""
         _errorMessage.value = null
+    }
+
+    fun selectWorkoutNumberInWeek(number: Int) {
+        _dayNumber.value = number
     }
 
     fun updateWorkoutName(name: String){
@@ -218,28 +248,45 @@ class TrainingViewModel(
             return
         }
 
+        fun startAddingExercise() {
+            _isAddingExercise.value = true
+        }
+
+        fun cancelAddingExercise() {
+            _isAddingExercise.value = false
+            clearExerciseInput()
+        }
+
+        if (sets == null || sets <= 0) {
+            _errorMessage.value = "Invalid set range"
+            return
+        }
+
         if (reps == null || reps <= 0) {
             _errorMessage.value = "Invalid rep range"
             return
         }
         viewModelScope.launch{
             trainingRepository.addExerciseToWorkout(
-            Exercise(
-                workoutId = workoutId,
-                exerciseDefinition = exerciseId.toInt(),
-                sets = sets,
-                reps = reps,
-                weight = weight,
-                rpe = rpe,
-                notes = notes,
-                targetWeight = null,
-                maxPercentage = null
-            ))
+                Exercise(
+                    workoutId = workoutId,
+                    exerciseDefinition = exerciseId.toInt(),
+                    sets = sets,
+                    reps = reps,
+                    weight = weight,
+                    rpe = rpe,
+                    notes = notes,
+                    targetWeight = null,
+                    maxPercentage = null
+                )
+            )
+
+            clearExerciseInput()
+            _isAddingExercise.value = false
         }
     }
 
     fun clearExerciseInput(){
-        _selectedWorkoutId.value = null
         _selectedExerciseId.value = null
         _exerciseSets.value = null
         _exerciseReps.value = null
@@ -259,19 +306,19 @@ class TrainingViewModel(
         _exerciseSets.value = sets
     }
 
-    fun updateReps(reps: Int){
+    fun updateReps(reps: Int?){
         _exerciseReps.value = reps
     }
 
-    fun updateWeight(weight: Int){
+    fun updateWeight(weight: Int?){
         _exerciseWeight.value = weight
     }
 
-    fun updateRpe(Rpe: Float){
+    fun updateRpe(Rpe: Float?){
         _exerciseRpe.value = Rpe
     }
 
-    fun updateNotes(notes: String){
+    fun updateNotes(notes: String?){
         _exerciseNotes.value = notes
     }
 

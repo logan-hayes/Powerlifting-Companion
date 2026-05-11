@@ -1,8 +1,12 @@
 package com.example.powerlifter_companion.ui
 
 import android.R.attr.name
+import com.example.powerlifter_companion.entities.Exercise
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,14 +42,35 @@ import androidx.compose.ui.unit.dp
 import com.example.powerlifter_companion.ui.theme.BackgroundGray
 import com.example.powerlifter_companion.ui.theme.PrimaryRed
 import com.example.powerlifter_companion.viewmodel.TrainingViewModel
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.clickable
+import com.example.powerlifter_companion.entities.TrainingBlocks
+import com.example.powerlifter_companion.entities.TrainingWeek
+import com.example.powerlifter_companion.entities.Workout
 
 
 @Composable
 fun blockUi(
     trainingViewModel: TrainingViewModel
 ) {
+    val blocks by trainingViewModel.trainingBlocks.collectAsState(initial = emptyList())
     val blockName by trainingViewModel.trainingBlockName.collectAsState()
     val blockLength by trainingViewModel.blockLength.collectAsState()
+    val weeks by trainingViewModel.trainingWeeksInBlock.collectAsState(initial = emptyList())
+    val workouts by trainingViewModel.workoutsInTrainingWeek.collectAsState(initial = emptyList())
+    val workoutName by trainingViewModel.workoutName.collectAsState()
+    val workoutNotes by trainingViewModel.workoutNotes.collectAsState()
+    val selectedBlockId by trainingViewModel.selectedBlockId.collectAsState()
+    val selectedWeekId by trainingViewModel.selectedTrainingWeekId.collectAsState()
+    val selectedWorkoutId by trainingViewModel.selectedWorkoutId.collectAsState()
+    val exercises by trainingViewModel.exercisesInWorkout.collectAsState(initial = emptyList())
+    val selectedExerciseId by trainingViewModel.selectedExerciseId.collectAsState()
+    val sets by trainingViewModel.selectedSets.collectAsState()
+    val reps by trainingViewModel.exerciseReps.collectAsState()
+    val weight by trainingViewModel.exerciseWeight.collectAsState()
+    val rpe by trainingViewModel.exerciseRpe.collectAsState()
+    val exerciseNotes by trainingViewModel.exerciseNotes.collectAsState()
+    val isAddingWorkout by trainingViewModel.isAddingWorkout.collectAsState()
 
     val gradient = Brush.verticalGradient(
         colors = listOf(BackgroundGray, PrimaryRed)
@@ -61,46 +86,456 @@ fun blockUi(
     ) {
         Spacer(modifier = Modifier.height(6.dp))
 
-        Text(
-            text = "Select a block or create a new one",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.White.copy(alpha = 0.75f)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                trainingViewModel.updateBlockName(blockName)
-                trainingViewModel.updateBlockLength(blockLength)
-                trainingViewModel.createBlock()
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp)
-        ) {
-            Text("Create Training Block")
+        if (selectedBlockId == null) {
+            BlockListSection(
+                blocks = blocks,
+                blockName = blockName,
+                blockLength = blockLength,
+                onBlockNameChange = { trainingViewModel.updateBlockName(it) },
+                onBlockLengthChange = { trainingViewModel.updateBlockLength(it) },
+                onCreateBlock = { trainingViewModel.createBlock() },
+                onBlockSelected = { trainingViewModel.selectTrainingBlock(it) }
+            )
+        } else {
+            if (selectedWorkoutId == null) {
+                SelectedBlockSection(
+                    weeks = weeks,
+                    workouts = workouts,
+                    workoutName = workoutName,
+                    workoutNotes = workoutNotes,
+                    selectedWeekId = selectedWeekId,
+                    isAddingWorkout = isAddingWorkout,
+                    onBackClick = { trainingViewModel.clearSelectedBlock() },
+                    onWeekSelected = { trainingViewModel.selectTrainingWeek(it) },
+                    onWorkoutSelected = { trainingViewModel.selectWorkout(it) },
+                    onWorkoutNumberSelected = {
+                        trainingViewModel.selectWorkoutNumberInWeek(it)
+                    },
+                    onAddWorkoutClick = {
+                        trainingViewModel.selectWorkoutNumberInWeek(workouts.size + 1)
+                        trainingViewModel.startAddingWorkout()
+                    },
+                    onCancelAddWorkout = {
+                        trainingViewModel.cancelAddingWorkout()
+                    },
+                    onWorkoutNameChange = { trainingViewModel.updateWorkoutName(it) },
+                    onWorkoutNotesChange = { trainingViewModel.updateWorkoutNotes(it) },
+                    onCreateWorkout = { trainingViewModel.createWorkout() }
+                )
+            } else {
+                WorkoutDetailSection(
+                    exercises = exercises,
+                    selectedExerciseId = selectedExerciseId,
+                    sets = sets,
+                    reps = reps,
+                    weight = weight,
+                    rpe = rpe,
+                    notes = exerciseNotes.orEmpty(),
+                    onBackClick = { trainingViewModel.clearSelectedWorkout() },
+                    onExerciseSelected = { trainingViewModel.selectExercise(it) },
+                    onSetsChange = { trainingViewModel.updateSets(it) },
+                    onRepsChange = { trainingViewModel.updateReps(it) },
+                    onWeightChange = { trainingViewModel.updateWeight(it) },
+                    onRpeChange = { trainingViewModel.updateRpe(it) },
+                    onNotesChange = { trainingViewModel.updateNotes(it) },
+                    onAddExercise = { trainingViewModel.addExerciseToWorkout() }
+                )
+            }
         }
+    }
+}
 
+@Composable
+fun BlockListSection(
+    blocks: List<TrainingBlocks>,
+    blockName: String,
+    blockLength: Int?,
+    onBlockNameChange: (String) -> Unit,
+    onBlockLengthChange: (Int) -> Unit,
+    onCreateBlock: () -> Unit,
+    onBlockSelected: (Long) -> Unit
+) {
+    Text(
+        text = "Select a block or create a new one",
+        style = MaterialTheme.typography.bodyMedium,
+        color = Color.White.copy(alpha = 0.75f)
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    OutlinedTextField(
+        value = blockName,
+        onValueChange = onBlockNameChange,
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("Block name") },
+        singleLine = true
+    )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Text(
+        text = "Block Length",
+        color = Color.White,
+        fontWeight = FontWeight.SemiBold
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        listOf(4, 6, 8, 12).forEach { weeks ->
+            Button(
+                onClick = { onBlockLengthChange(weeks) },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor =
+                        if (blockLength == weeks) PrimaryRed
+                        else Color.DarkGray
+                )
+            ) {
+                Text("$weeks")
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Button(
+        onClick = onCreateBlock,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp)
+    ) {
+        Text("Create Training Block")
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    blocks.forEach { block ->
+        BlockCard(
+            blockName = block.blockName,
+            lengthWeeks = "${block.weekLength} weeks",
+            startDate = block.startDate.toString(),
+            onClick = { onBlockSelected(block.blockId) }
+        )
+    }
+}
+
+@Composable
+fun SelectedBlockSection(
+    weeks: List<TrainingWeek>,
+    workouts: List<Workout>,
+    workoutName: String,
+    workoutNotes: String,
+    selectedWeekId: Long?,
+    isAddingWorkout: Boolean,
+    onBackClick: () -> Unit,
+    onWeekSelected: (Long) -> Unit,
+    onWorkoutSelected: (Long) -> Unit,
+    onWorkoutNumberSelected: (Int) -> Unit,
+    onAddWorkoutClick: () -> Unit,
+    onCancelAddWorkout: () -> Unit,
+    onWorkoutNameChange: (String) -> Unit,
+    onWorkoutNotesChange: (String) -> Unit,
+    onCreateWorkout: () -> Unit
+) {
+    Button(
+        onClick = onBackClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = PrimaryRed,
+            contentColor = Color.White
+        )
+    ) {
+        Text("Back to Blocks")
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    Text(
+        text = "Select Week",
+        color = Color.White,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(modifier = Modifier.height(10.dp))
+
+    weeks.forEach { week ->
+        WeekCard(
+            week = week,
+            isSelected = selectedWeekId == week.trainingWeekId,
+            onClick = { onWeekSelected(week.trainingWeekId) }
+        )
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    Text(
+        text = if (selectedWeekId == null) "Choose a week to view workouts" else "Workouts",
+        color = Color.White,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(modifier = Modifier.height(10.dp))
+
+    WeekWorkoutList(
+        workouts = workouts,
+        onAddWorkoutClick = onAddWorkoutClick,
+        onWorkoutSelected = onWorkoutSelected
+    )
+
+    if (isAddingWorkout) {
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Blocks list
-        BlockCard(
-            blockName = "Hypertrophy",
-            lengthWeeks = "6 weeks",
-            startDate = "4/1/26"
+        OutlinedTextField(
+            value = workoutName,
+            onValueChange = onWorkoutNameChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Workout name") },
+            singleLine = true
         )
 
-        BlockCard(
-            blockName = "Strength",
-            lengthWeeks = "4 weeks",
-            startDate = "5/15/26"
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = workoutNotes,
+            onValueChange = onWorkoutNotesChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Workout notes") }
         )
 
-        BlockCard(
-            blockName = "Peaking",
-            lengthWeeks = "4 weeks",
-            startDate = "7/1/26"
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = onCreateWorkout,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = PrimaryRed,
+                contentColor = Color.White
+            )
+        ) {
+            Text("Save Workout")
+        }
+
+        Button(
+            onClick = onCancelAddWorkout,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.DarkGray,
+                contentColor = Color.White
+            )
+        ) {
+            Text("Cancel")
+        }
+    }
+}
+
+@Composable
+fun WeekCard(
+    week: TrainingWeek,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) PrimaryRed else Color(0xFF1E1E1E).copy(alpha = 0.92f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Week ${week.weekNumber}",
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+
+@Composable
+fun WorkoutCard(
+    workout: Workout,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .clickable {onClick()},
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF151515).copy(alpha = 0.95f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Text(
+                text = workout.workoutName,
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (workout.notes.isNotBlank()) {
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = workout.notes,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun WorkoutDetailSection(
+    exercises: List<Exercise>,
+    selectedExerciseId: Long?,
+    sets: Int?,
+    reps: Int?,
+    weight: Int?,
+    rpe: Float?,
+    notes: String,
+    onBackClick: () -> Unit,
+    onExerciseSelected: (Long) -> Unit,
+    onSetsChange: (Int?) -> Unit,
+    onRepsChange: (Int?) -> Unit,
+    onWeightChange: (Int?) -> Unit,
+    onRpeChange: (Float?) -> Unit,
+    onNotesChange: (String) -> Unit,
+    onAddExercise: () -> Unit
+) {
+    Button(
+        onClick = onBackClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = PrimaryRed,
+            contentColor = Color.White
         )
+    ) {
+        Text("Back to Week")
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    Text(
+        text = "Workout Details",
+        color = Color.White,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    BlockTableHeader()
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    exercises.forEach { exercise ->
+        BlockTableRow(
+            exercise = exercise.exerciseDefinition.toString(),
+            sets = exercise.sets?.toString() ?: "",
+            reps = exercise.reps?.toString() ?: "",
+            weight = exercise.weight?.toString() ?: "",
+            rpe = exercise.rpe?.toString() ?: "",
+            notes = exercise.notes ?: ""
+        )
+    }
+    Spacer(modifier = Modifier.height(20.dp))
+
+    Text(
+        text = "Add Exercise",
+        color = Color.White,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(modifier = Modifier.height(10.dp))
+
+    Button(
+        onClick = { onExerciseSelected(1L) },
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (selectedExerciseId == 1L) PrimaryRed else Color.DarkGray,
+            contentColor = Color.White
+        )
+    ) {
+        Text(if (selectedExerciseId == 1L) "Squat Selected" else "Select Squat")
+    }
+
+    OutlinedTextField(
+        value = sets?.toString() ?: "",
+        onValueChange = { onSetsChange(it.toIntOrNull()) },
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("Sets") },
+        singleLine = true
+    )
+
+    OutlinedTextField(
+        value = reps?.toString() ?: "",
+        onValueChange = { onRepsChange(it.toIntOrNull()) },
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("Reps") },
+        singleLine = true
+    )
+
+    OutlinedTextField(
+        value = weight?.toString() ?: "",
+        onValueChange = { onWeightChange(it.toIntOrNull()) },
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("Weight") },
+        singleLine = true
+    )
+
+    OutlinedTextField(
+        value = rpe?.toString() ?: "",
+        onValueChange = { onRpeChange(it.toFloatOrNull()) },
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("RPE") },
+        singleLine = true
+    )
+
+    OutlinedTextField(
+        value = notes,
+        onValueChange = onNotesChange,
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("Notes") }
+    )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Button(
+        onClick = onAddExercise,
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = PrimaryRed,
+            contentColor = Color.White
+        )
+    ) {
+        Text("Add Exercise")
     }
 }
 
@@ -120,6 +555,45 @@ fun blockHeader(){
             containerColor = Color.Transparent
         )
     )
+}
+
+@Composable
+fun WeekWorkoutList(
+    workouts: List<Workout>,
+    onAddWorkoutClick: () -> Unit,
+    onWorkoutSelected: (Long) -> Unit
+) {
+    Column {
+        Text(
+            text = "Workouts This Week",
+            color = Color.White,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        workouts.sortedBy { it.dayNumber }.forEachIndexed { index, workout ->
+            WorkoutCard(
+                workout = workout.copy(dayNumber = index + 1),
+                onClick = { onWorkoutSelected(workout.workoutId) }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = onAddWorkoutClick,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = PrimaryRed,
+                contentColor = Color.White
+            )
+        ) {
+            Text("+ Add Workout")
+        }
+    }
 }
 
 @Composable
@@ -210,12 +684,14 @@ fun currentBlock(
 fun BlockCard(
     blockName: String,
     lengthWeeks: String,
-    startDate: String
+    startDate: String,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .clickable{ onClick() }
     ) {
         Box(
             modifier = Modifier

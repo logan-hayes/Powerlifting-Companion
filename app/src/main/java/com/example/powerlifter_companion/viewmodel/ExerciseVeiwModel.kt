@@ -10,11 +10,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+
 class ExerciseViewModel(
-    private val exerciseRepository: ExerciseRepository
+    private val exerciseRepository: ExerciseRepository,
+    private val repository: ExerciseRepository
 ) : ViewModel() {
 
     val exerciseDefinitions = exerciseRepository.getAllExerciseDefinitions()
+
 
 
     private val _exerciseName = MutableStateFlow("")
@@ -66,6 +69,12 @@ class ExerciseViewModel(
             _exerciseCategory.value = null
             _exerciseMuscleGroup.value = null
             _errorMessage.value = null
+        }
+    }
+
+    fun seedExercises() {
+        viewModelScope.launch {
+            repository.seedExercisesIfEmpty()
         }
     }
 
