@@ -44,6 +44,7 @@ import com.example.powerlifter_companion.ui.theme.PrimaryRed
 import com.example.powerlifter_companion.viewmodel.TrainingViewModel
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.foundation.clickable
+import com.example.powerlifter_companion.entities.ExerciseDefinition
 import com.example.powerlifter_companion.entities.TrainingBlocks
 import com.example.powerlifter_companion.entities.TrainingWeek
 import com.example.powerlifter_companion.entities.Workout
@@ -64,6 +65,9 @@ fun blockUi(
     val selectedWeekId by trainingViewModel.selectedTrainingWeekId.collectAsState()
     val selectedWorkoutId by trainingViewModel.selectedWorkoutId.collectAsState()
     val exercises by trainingViewModel.exercisesInWorkout.collectAsState(initial = emptyList())
+    val exerciseDefinitions by trainingViewModel.exerciseDefinitions.collectAsState(
+        initial = emptyList()
+    )
     val selectedExerciseId by trainingViewModel.selectedExerciseId.collectAsState()
     val sets by trainingViewModel.selectedSets.collectAsState()
     val reps by trainingViewModel.exerciseReps.collectAsState()
@@ -71,6 +75,7 @@ fun blockUi(
     val rpe by trainingViewModel.exerciseRpe.collectAsState()
     val exerciseNotes by trainingViewModel.exerciseNotes.collectAsState()
     val isAddingWorkout by trainingViewModel.isAddingWorkout.collectAsState()
+    val selectedWorkout = workouts.firstOrNull { it.workoutId == selectedWorkoutId }
 
     val gradient = Brush.verticalGradient(
         colors = listOf(BackgroundGray, PrimaryRed)
@@ -124,7 +129,9 @@ fun blockUi(
                 )
             } else {
                 WorkoutDetailSection(
+                    workoutName = selectedWorkout?.workoutName ?: "Workout Details",
                     exercises = exercises,
+                    exerciseDefinitions = exerciseDefinitions,
                     selectedExerciseId = selectedExerciseId,
                     sets = sets,
                     reps = reps,
@@ -411,7 +418,9 @@ fun WorkoutCard(
 
 @Composable
 fun WorkoutDetailSection(
+    workoutName: String,
     exercises: List<Exercise>,
+    exerciseDefinitions: List<ExerciseDefinition>,
     selectedExerciseId: Long?,
     sets: Int?,
     reps: Int?,
@@ -442,7 +451,7 @@ fun WorkoutDetailSection(
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
-        text = "Workout Details",
+        text = workoutName,
         color = Color.White,
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold
@@ -456,7 +465,9 @@ fun WorkoutDetailSection(
 
     exercises.forEach { exercise ->
         BlockTableRow(
-            exercise = exercise.exerciseDefinition.toString(),
+            exercise = exerciseDefinitions
+                .firstOrNull { it.exerciseDefinitionID == exercise.exerciseDefinition }
+                ?.name ?: "Unknown",
             sets = exercise.sets?.toString() ?: "",
             reps = exercise.reps?.toString() ?: "",
             weight = exercise.weight?.toString() ?: "",
@@ -467,24 +478,13 @@ fun WorkoutDetailSection(
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
-        text = "Add Exercise",
+        text = "Add Exercise to $workoutName",
         color = Color.White,
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold
     )
 
     Spacer(modifier = Modifier.height(10.dp))
-
-    Button(
-        onClick = { onExerciseSelected(1L) },
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (selectedExerciseId == 1L) PrimaryRed else Color.DarkGray,
-            contentColor = Color.White
-        )
-    ) {
-        Text(if (selectedExerciseId == 1L) "Squat Selected" else "Select Squat")
-    }
 
     OutlinedTextField(
         value = sets?.toString() ?: "",
@@ -524,6 +524,11 @@ fun WorkoutDetailSection(
         modifier = Modifier.fillMaxWidth(),
         label = { Text("Notes") }
     )
+                ExerciseSelector(
+                exerciseDefinitions = exerciseDefinitions,
+        selectedExerciseId = selectedExerciseId,
+        onExerciseSelected = onExerciseSelected
+    )
 
     Spacer(modifier = Modifier.height(12.dp))
 
@@ -536,6 +541,7 @@ fun WorkoutDetailSection(
         )
     ) {
         Text("Add Exercise")
+
     }
 }
 
@@ -611,7 +617,7 @@ fun RowScope.TableCell(
         Text(
             text = text,
             fontWeight = if (isHeader) FontWeight.Bold else FontWeight.Normal,
-            color = if (isHeader) Color.Black else Color.White,
+            color = Color.White,
             style = if(isHeader)
                 MaterialTheme.typography.bodyMedium
             else
@@ -625,14 +631,14 @@ fun BlockTableHeader(){
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White.copy(alpha = 0.88f))
+            .background(Color(0xFF1E1E1E))
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically)
     {
         TableCell("Exercise", weight = 2f, isHeader = true)
         TableCell("Sets", weight = 1f, isHeader = true)
         TableCell("Reps", weight = 1f, isHeader = true)
-        TableCell("Weight", weight = 1f, isHeader = true)
+        TableCell("Wt.", weight = 1f, isHeader = true)
         TableCell("RPE", weight = 1f, isHeader = true)
         TableCell("Notes", weight = 2f, isHeader = true)
 

@@ -28,8 +28,43 @@ object ExerciseSeedData {
         ),
 
         ExerciseDefinition(
+            name = "Floor press",
+            category = ExerciseCategory.COMPETITION_VARIATION,
+            muscleGroup = MuscleGroup.CHEST,
+            isCustom = false
+        ),
+
+        ExerciseDefinition(
+            name = "Tricep Extensions",
+            category = ExerciseCategory.ACCESSORY,
+            muscleGroup = MuscleGroup.TRICEPS,
+            isCustom = false
+        ),
+
+        ExerciseDefinition(
+            name = "shoulder Dumbbell press",
+            category = ExerciseCategory.ACCESSORY,
+            muscleGroup = MuscleGroup.SHOULDERS,
+            isCustom = false
+        ),
+
+        ExerciseDefinition(
             name = "Deadlift",
             category = ExerciseCategory.COMPETITION,
+            muscleGroup = MuscleGroup.BACK,
+            isCustom = false
+        ),
+
+        ExerciseDefinition(
+            name = "Hamstring curl",
+            category = ExerciseCategory.ACCESSORY,
+            muscleGroup = MuscleGroup.HAMSTRINGS,
+            isCustom = false
+        ),
+
+        ExerciseDefinition(
+            name = "Bent over Barbell Rows",
+            category = ExerciseCategory.ACCESSORY,
             muscleGroup = MuscleGroup.BACK,
             isCustom = false
         ),

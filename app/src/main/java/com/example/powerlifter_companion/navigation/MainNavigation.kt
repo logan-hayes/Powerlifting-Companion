@@ -34,10 +34,15 @@ fun Scaffolding() {
                 trainingBlocksDao = db.trainingBlocksDao(),
                 trainingWeekDao = db.trainingWeekDao(),
                 workoutDao = db.workoutDao(),
-                exerciseDao = db.exerciseDao()
+                exerciseDao = db.exerciseDao(),
+                exerciseDefinitionDao = db.exerciseDefinitionDao()
             )
         )
     }
+    LaunchedEffect(Unit) {
+        trainingViewModel.seedExercises()
+    }
+
     val selectedIndex = remember { mutableStateOf(0) }
     Scaffold(
         topBar = {

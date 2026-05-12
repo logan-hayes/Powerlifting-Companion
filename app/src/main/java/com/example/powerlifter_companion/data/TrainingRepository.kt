@@ -9,7 +9,8 @@ class TrainingRepository(
     private val trainingBlocksDao: TrainingBlocksDao,
     private val trainingWeekDao: TrainingWeekDao,
     private val workoutDao: WorkoutDao,
-    private val exerciseDao: ExerciseDao
+    private val exerciseDao: ExerciseDao,
+    private val exerciseDefinitionDao: ExerciseDefinitionDao
 ) {
 
     // Block specific
@@ -86,4 +87,15 @@ class TrainingRepository(
 
     suspend fun deleteExercise(exercise: Exercise) =
         exerciseDao.deleteExercise(exercise)
+
+    fun getAllExerciseDefinitions() =
+        exerciseDefinitionDao.getAllExerciseDefinitions()
+
+    suspend fun seedExercisesIfEmpty() {
+        if (exerciseDefinitionDao.getExerciseDefinitionCount() == 0) {
+            exerciseDefinitionDao.insertExerciseDefinitionList(
+                ExerciseSeedData.defaultExercises
+            )
+        }
+    }
 }

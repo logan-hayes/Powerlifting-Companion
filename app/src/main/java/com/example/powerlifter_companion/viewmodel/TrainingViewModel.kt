@@ -30,6 +30,9 @@ class TrainingViewModel(
 
     val trainingBlocks = trainingRepository.getAllBlocks()
 
+    val exerciseDefinitions =
+        trainingRepository.getAllExerciseDefinitions()
+
     //Week Specific//
 
     private val _selectedTrainingWeekId = MutableStateFlow<Long?>(null)
@@ -332,5 +335,11 @@ class TrainingViewModel(
 
     fun clearError() {
         _errorMessage.value = null
+    }
+
+    fun seedExercises() {
+        viewModelScope.launch {
+            trainingRepository.seedExercisesIfEmpty()
+        }
     }
 }
