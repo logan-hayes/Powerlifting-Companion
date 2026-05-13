@@ -11,5 +11,8 @@ public enum MuscleGroup {
     HAMSTRINGS,
     QUADS,
     CALVES,
+    GLUTES,
+    POSTERIOR_CHAIN,
+    TRAPS,
     MISC
 }

@@ -26,7 +26,7 @@ import com.example.powerlifter_companion.entities.PostWorkout
         ExerciseDefinition::class,
         Exercise::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -51,7 +51,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "powerlifter_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
 
                 INSTANCE = instance
                 instance

@@ -1,7 +1,6 @@
 package com.example.powerlifter_companion.ui
 
-import android.R.attr.name
-import com.example.powerlifter_companion.entities.Exercise
+import com.example.powerlifter_companion.ui.Components.WorkoutDetailSection
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.BorderStroke
@@ -36,19 +35,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.powerlifter_companion.ui.theme.BackgroundGray
 import com.example.powerlifter_companion.ui.theme.PrimaryRed
 import com.example.powerlifter_companion.viewmodel.TrainingViewModel
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.foundation.clickable
-import com.example.powerlifter_companion.entities.ExerciseDefinition
 import com.example.powerlifter_companion.entities.TrainingBlocks
 import com.example.powerlifter_companion.entities.TrainingWeek
 import com.example.powerlifter_companion.entities.Workout
-
 
 @Composable
 fun blockUi(
@@ -76,6 +70,7 @@ fun blockUi(
     val exerciseNotes by trainingViewModel.exerciseNotes.collectAsState()
     val isAddingWorkout by trainingViewModel.isAddingWorkout.collectAsState()
     val selectedWorkout = workouts.firstOrNull { it.workoutId == selectedWorkoutId }
+    val isAddingExercise by trainingViewModel.isAddingExercise.collectAsState()
 
     val gradient = Brush.verticalGradient(
         colors = listOf(BackgroundGray, PrimaryRed)
@@ -138,6 +133,7 @@ fun blockUi(
                     weight = weight,
                     rpe = rpe,
                     notes = exerciseNotes.orEmpty(),
+                    isAddingExercise = isAddingExercise,
                     onBackClick = { trainingViewModel.clearSelectedWorkout() },
                     onExerciseSelected = { trainingViewModel.selectExercise(it) },
                     onSetsChange = { trainingViewModel.updateSets(it) },
@@ -145,6 +141,8 @@ fun blockUi(
                     onWeightChange = { trainingViewModel.updateWeight(it) },
                     onRpeChange = { trainingViewModel.updateRpe(it) },
                     onNotesChange = { trainingViewModel.updateNotes(it) },
+                    onStartAddExercise = { trainingViewModel.startAddingExercise() },
+                    onCancelAddExercise = { trainingViewModel.cancelAddingExercise() },
                     onAddExercise = { trainingViewModel.addExerciseToWorkout() }
                 )
             }
@@ -281,15 +279,6 @@ fun SelectedBlockSection(
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    Text(
-        text = if (selectedWeekId == null) "Choose a week to view workouts" else "Workouts",
-        color = Color.White,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold
-    )
-
-    Spacer(modifier = Modifier.height(10.dp))
-
     WeekWorkoutList(
         workouts = workouts,
         onAddWorkoutClick = onAddWorkoutClick,
@@ -413,135 +402,6 @@ fun WorkoutCard(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun WorkoutDetailSection(
-    workoutName: String,
-    exercises: List<Exercise>,
-    exerciseDefinitions: List<ExerciseDefinition>,
-    selectedExerciseId: Long?,
-    sets: Int?,
-    reps: Int?,
-    weight: Int?,
-    rpe: Float?,
-    notes: String,
-    onBackClick: () -> Unit,
-    onExerciseSelected: (Long) -> Unit,
-    onSetsChange: (Int?) -> Unit,
-    onRepsChange: (Int?) -> Unit,
-    onWeightChange: (Int?) -> Unit,
-    onRpeChange: (Float?) -> Unit,
-    onNotesChange: (String) -> Unit,
-    onAddExercise: () -> Unit
-) {
-    Button(
-        onClick = onBackClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = PrimaryRed,
-            contentColor = Color.White
-        )
-    ) {
-        Text("Back to Week")
-    }
-
-    Spacer(modifier = Modifier.height(20.dp))
-
-    Text(
-        text = workoutName,
-        color = Color.White,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    BlockTableHeader()
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    exercises.forEach { exercise ->
-        BlockTableRow(
-            exercise = exerciseDefinitions
-                .firstOrNull { it.exerciseDefinitionID == exercise.exerciseDefinition }
-                ?.name ?: "Unknown",
-            sets = exercise.sets?.toString() ?: "",
-            reps = exercise.reps?.toString() ?: "",
-            weight = exercise.weight?.toString() ?: "",
-            rpe = exercise.rpe?.toString() ?: "",
-            notes = exercise.notes ?: ""
-        )
-    }
-    Spacer(modifier = Modifier.height(20.dp))
-
-    Text(
-        text = "Add Exercise to $workoutName",
-        color = Color.White,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold
-    )
-
-    Spacer(modifier = Modifier.height(10.dp))
-
-    OutlinedTextField(
-        value = sets?.toString() ?: "",
-        onValueChange = { onSetsChange(it.toIntOrNull()) },
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text("Sets") },
-        singleLine = true
-    )
-
-    OutlinedTextField(
-        value = reps?.toString() ?: "",
-        onValueChange = { onRepsChange(it.toIntOrNull()) },
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text("Reps") },
-        singleLine = true
-    )
-
-    OutlinedTextField(
-        value = weight?.toString() ?: "",
-        onValueChange = { onWeightChange(it.toIntOrNull()) },
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text("Weight") },
-        singleLine = true
-    )
-
-    OutlinedTextField(
-        value = rpe?.toString() ?: "",
-        onValueChange = { onRpeChange(it.toFloatOrNull()) },
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text("RPE") },
-        singleLine = true
-    )
-
-    OutlinedTextField(
-        value = notes,
-        onValueChange = onNotesChange,
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text("Notes") }
-    )
-                ExerciseSelector(
-                exerciseDefinitions = exerciseDefinitions,
-        selectedExerciseId = selectedExerciseId,
-        onExerciseSelected = onExerciseSelected
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    Button(
-        onClick = onAddExercise,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = PrimaryRed,
-            contentColor = Color.White
-        )
-    ) {
-        Text("Add Exercise")
-
     }
 }
 

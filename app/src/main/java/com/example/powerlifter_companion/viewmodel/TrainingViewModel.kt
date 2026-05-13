@@ -251,15 +251,6 @@ class TrainingViewModel(
             return
         }
 
-        fun startAddingExercise() {
-            _isAddingExercise.value = true
-        }
-
-        fun cancelAddingExercise() {
-            _isAddingExercise.value = false
-            clearExerciseInput()
-        }
-
         if (sets == null || sets <= 0) {
             _errorMessage.value = "Invalid set range"
             return
@@ -283,10 +274,19 @@ class TrainingViewModel(
                     maxPercentage = null
                 )
             )
-
-            clearExerciseInput()
-            _isAddingExercise.value = false
         }
+
+        clearExerciseInput()
+        _isAddingExercise.value = false
+    }
+
+    fun startAddingExercise() {
+        _isAddingExercise.value = true
+    }
+
+    fun cancelAddingExercise() {
+        _isAddingExercise.value = false
+        clearExerciseInput()
     }
 
     fun clearExerciseInput(){
