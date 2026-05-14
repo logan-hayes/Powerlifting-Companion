@@ -65,7 +65,11 @@ fun Scaffolding() {
 
         Box(modifier = Modifier.padding(innerpadding)) {
             when (selectedIndex.value) {
-                0 -> HomeScreen()
+                0 -> HomeScreen(
+                    onGoToCurrentWorkout = {
+                        selectedIndex.value = 2
+                    }
+                )
                 1 -> PerformanceUi()
                 2 -> blockUi(trainingViewModel)
                 3 -> profileUi()

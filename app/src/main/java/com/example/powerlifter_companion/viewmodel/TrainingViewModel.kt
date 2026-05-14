@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.powerlifter_companion.data.TrainingRepository
 import com.example.powerlifter_companion.entities.Exercise
 import com.example.powerlifter_companion.entities.TrainingBlocks
+import com.example.powerlifter_companion.entities.TrainingWeek
 import com.example.powerlifter_companion.entities.Workout
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -161,6 +162,12 @@ class TrainingViewModel(
         _selectedTrainingWeekId.value = trainingWeekId
     }
 
+    fun deleteTrainingWeek(trainingWeek: TrainingWeek) {
+        viewModelScope.launch {
+            trainingRepository.deleteTrainingWeek(trainingWeek)
+        }
+    }
+
     //Workout Specific//
 
     fun selectWorkout(workoutId: Long) {
@@ -228,6 +235,12 @@ class TrainingViewModel(
 
     fun updateWorkoutNotes(notes: String){
         _workoutNotes.value = notes
+    }
+
+    fun deleteWorkout(workout: Workout){
+        viewModelScope.launch {
+            trainingRepository.deleteWorkout(workout)
+        }
     }
 
     //Exercise Specific//
@@ -342,4 +355,5 @@ class TrainingViewModel(
             trainingRepository.seedExercisesIfEmpty()
         }
     }
+
 }

@@ -48,7 +48,9 @@ fun TopGreeting() {
     }
 
 @Composable
-fun NextWorkoutCard() {
+fun NextWorkoutCard(
+    onGoToCurrentWorkout: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
@@ -99,7 +101,7 @@ fun NextWorkoutCard() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {},
+                onClick = onGoToCurrentWorkout,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -241,7 +243,9 @@ fun Branding(modifier: Modifier = Modifier){
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onGoToCurrentWorkout: () -> Unit
+){
     val gradientBlack = Brush.verticalGradient(
         colors = listOf(
             BackgroundGray,
@@ -260,7 +264,9 @@ fun HomeScreen() {
 
             TopGreeting()
             Spacer(modifier = Modifier.height(24.dp))
-            NextWorkoutCard()
+            NextWorkoutCard(
+                onGoToCurrentWorkout = onGoToCurrentWorkout
+            )
             Spacer(modifier = Modifier.height(24.dp))
             WeeklyExposureCard()
             Spacer(modifier = Modifier.height(24.dp))

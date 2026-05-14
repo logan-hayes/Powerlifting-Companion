@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,6 +33,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -43,6 +48,13 @@ import com.example.powerlifter_companion.viewmodel.TrainingViewModel
 import com.example.powerlifter_companion.entities.TrainingBlocks
 import com.example.powerlifter_companion.entities.TrainingWeek
 import com.example.powerlifter_companion.entities.Workout
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 @Composable
 fun blockUi(
@@ -70,8 +82,8 @@ fun blockUi(
     val exerciseNotes by trainingViewModel.exerciseNotes.collectAsState()
     val isAddingWorkout by trainingViewModel.isAddingWorkout.collectAsState()
     val selectedWorkout = workouts.firstOrNull { it.workoutId == selectedWorkoutId }
+    var isViewingCurrentWorkout by remember { mutableStateOf(false) }
     val isAddingExercise by trainingViewModel.isAddingExercise.collectAsState()
-
     val gradient = Brush.verticalGradient(
         colors = listOf(BackgroundGray, PrimaryRed)
     )
@@ -120,36 +132,52 @@ fun blockUi(
                     },
                     onWorkoutNameChange = { trainingViewModel.updateWorkoutName(it) },
                     onWorkoutNotesChange = { trainingViewModel.updateWorkoutNotes(it) },
-                    onCreateWorkout = { trainingViewModel.createWorkout() }
+                    onCreateWorkout = { trainingViewModel.createWorkout() },
+                    onDeleteWorkout = { trainingViewModel.deleteWorkout(it) },
+                    onDeleteWeek = { trainingViewModel.deleteTrainingWeek(it) }
                 )
             } else {
-                WorkoutDetailSection(
-                    workoutName = selectedWorkout?.workoutName ?: "Workout Details",
-                    exercises = exercises,
-                    exerciseDefinitions = exerciseDefinitions,
-                    selectedExerciseId = selectedExerciseId,
-                    sets = sets,
-                    reps = reps,
-                    weight = weight,
-                    rpe = rpe,
-                    notes = exerciseNotes.orEmpty(),
-                    isAddingExercise = isAddingExercise,
-                    onBackClick = { trainingViewModel.clearSelectedWorkout() },
-                    onExerciseSelected = { trainingViewModel.selectExercise(it) },
-                    onSetsChange = { trainingViewModel.updateSets(it) },
-                    onRepsChange = { trainingViewModel.updateReps(it) },
-                    onWeightChange = { trainingViewModel.updateWeight(it) },
-                    onRpeChange = { trainingViewModel.updateRpe(it) },
-                    onNotesChange = { trainingViewModel.updateNotes(it) },
-                    onStartAddExercise = { trainingViewModel.startAddingExercise() },
-                    onCancelAddExercise = { trainingViewModel.cancelAddingExercise() },
-                    onAddExercise = { trainingViewModel.addExerciseToWorkout() }
-                )
+                if (isViewingCurrentWorkout) {
+                    CurrentWorkoutScreen(
+                        workoutName = selectedWorkout?.workoutName ?: "Current Workout",
+                        exercises = exercises,
+                        exerciseDefinitions = exerciseDefinitions,
+                        onCompleteWorkout = {
+                            isViewingCurrentWorkout = false
+                        }
+                    )
+                } else {
+                    WorkoutDetailSection(
+                        workoutName = selectedWorkout?.workoutName ?: "Workout Details",
+                        exercises = exercises,
+                        exerciseDefinitions = exerciseDefinitions,
+                        selectedExerciseId = selectedExerciseId,
+                        sets = sets,
+                        reps = reps,
+                        weight = weight,
+                        rpe = rpe,
+                        notes = exerciseNotes.orEmpty(),
+                        isAddingExercise = isAddingExercise,
+                        onBackClick = { trainingViewModel.clearSelectedWorkout() },
+                        onExerciseSelected = { trainingViewModel.selectExercise(it) },
+                        onSetsChange = { trainingViewModel.updateSets(it) },
+                        onRepsChange = { trainingViewModel.updateReps(it) },
+                        onWeightChange = { trainingViewModel.updateWeight(it) },
+                        onRpeChange = { trainingViewModel.updateRpe(it) },
+                        onNotesChange = { trainingViewModel.updateNotes(it) },
+                        onStartAddExercise = { trainingViewModel.startAddingExercise() },
+                        onCancelAddExercise = { trainingViewModel.cancelAddingExercise() },
+                        onAddExercise = { trainingViewModel.addExerciseToWorkout() },
+                        onDeleteExercise = { trainingViewModel.deleteExercise(it) },
+                        onStartWorkout = {
+                            isViewingCurrentWorkout = true
+                        }
+                    )
+                }
             }
         }
     }
 }
-
 @Composable
 fun BlockListSection(
     blocks: List<TrainingBlocks>,
@@ -244,18 +272,25 @@ fun SelectedBlockSection(
     onCancelAddWorkout: () -> Unit,
     onWorkoutNameChange: (String) -> Unit,
     onWorkoutNotesChange: (String) -> Unit,
-    onCreateWorkout: () -> Unit
+    onCreateWorkout: () -> Unit,
+    onDeleteWorkout: (Workout) -> Unit,
+    onDeleteWeek: (TrainingWeek) -> Unit
 ) {
-    Button(
-        onClick = onBackClick,
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = PrimaryRed,
-            contentColor = Color.White
-        )
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("Back to Blocks")
+        IconButton(
+            onClick = onBackClick
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.White
+            )
+        }
+
+        Spacer(modifier = Modifier.width(4.dp))
     }
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -282,7 +317,8 @@ fun SelectedBlockSection(
     WeekWorkoutList(
         workouts = workouts,
         onAddWorkoutClick = onAddWorkoutClick,
-        onWorkoutSelected = onWorkoutSelected
+        onWorkoutSelected = onWorkoutSelected,
+        onDeleteWorkout = onDeleteWorkout
     )
 
     if (isAddingWorkout) {
@@ -370,38 +406,108 @@ fun WeekCard(
 @Composable
 fun WorkoutCard(
     workout: Workout,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDeleteClick: (() -> Unit)? = null
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
-            .clickable {onClick()},
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFF151515).copy(alpha = 0.95f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
-            Text(
-                text = workout.workoutName,
-                color = Color.White,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            if (workout.notes.isNotBlank()) {
-                Spacer(modifier = Modifier.height(6.dp))
-
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
-                    text = workout.notes,
-                    color = Color.White.copy(alpha = 0.7f)
+                    text = workout.workoutName,
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
+
+                if (workout.notes.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = workout.notes,
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                }
+            }
+
+            if (onDeleteClick != null) {
+                Box {
+                    IconButton(
+                        onClick = { menuExpanded = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Workout Options",
+                            tint = Color.White
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Delete Workout") },
+                            onClick = {
+                                menuExpanded = false
+                                showDeleteDialog = true
+                            }
+                        )
+                    }
+                }
             }
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Workout?") },
+            text = {
+                Text("Are you sure you want to delete ${workout.workoutName}?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDeleteClick?.invoke()
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PrimaryRed,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -427,7 +533,8 @@ fun blockHeader(){
 fun WeekWorkoutList(
     workouts: List<Workout>,
     onAddWorkoutClick: () -> Unit,
-    onWorkoutSelected: (Long) -> Unit
+    onWorkoutSelected: (Long) -> Unit,
+    onDeleteWorkout: (Workout) -> Unit
 ) {
     Column {
         Text(
@@ -442,7 +549,8 @@ fun WeekWorkoutList(
         workouts.sortedBy { it.dayNumber }.forEachIndexed { index, workout ->
             WorkoutCard(
                 workout = workout.copy(dayNumber = index + 1),
-                onClick = { onWorkoutSelected(workout.workoutId) }
+                onClick = { onWorkoutSelected(workout.workoutId) },
+                onDeleteClick = { onDeleteWorkout(workout) }
             )
         }
 
@@ -591,11 +699,6 @@ fun BlockCard(
                 Text(
                     text = lengthWeeks,
                     color = Color.White.copy(alpha = 0.78f)
-                )
-
-                Text(
-                    text = startDate,
-                    color = Color.White.copy(alpha = 0.62f)
                 )
             }
         }

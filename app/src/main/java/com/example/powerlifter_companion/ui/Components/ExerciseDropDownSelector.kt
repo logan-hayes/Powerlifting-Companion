@@ -32,13 +32,14 @@ import com.example.powerlifter_companion.ui.theme.PrimaryRed
 fun ExerciseDropdownSelector(
     exerciseDefinitions: List<ExerciseDefinition>,
     selectedExerciseId: Long?,
+    selectedCategories: Set<ExerciseCategory>,
+    selectedMuscleGroups: Set<MuscleGroup>,
+    onCategoriesChange: (Set<ExerciseCategory>) -> Unit,
+    onMuscleGroupsChange: (Set<MuscleGroup>) -> Unit,
     onExerciseSelected: (Long) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var filterExpanded by remember { mutableStateOf(false) }
-
-    var selectedCategories by remember { mutableStateOf(setOf<ExerciseCategory>()) }
-    var selectedMuscleGroups by remember { mutableStateOf(setOf<MuscleGroup>()) }
 
     val filteredExercises = exerciseDefinitions
         .filter {
@@ -76,8 +77,8 @@ fun ExerciseDropdownSelector(
                     DropdownMenuItem(
                         text = { Text("Clear Filters") },
                         onClick = {
-                            selectedCategories = emptySet()
-                            selectedMuscleGroups = emptySet()
+                            onCategoriesChange(emptySet())
+                            onMuscleGroupsChange(emptySet())
                         }
                     )
 
@@ -92,12 +93,13 @@ fun ExerciseDropdownSelector(
                                 )
                             },
                             onClick = {
-                                selectedCategories =
+                                onCategoriesChange(
                                     if (category in selectedCategories) {
                                         selectedCategories - category
                                     } else {
                                         selectedCategories + category
                                     }
+                                )
                             }
                         )
                     }
@@ -113,12 +115,13 @@ fun ExerciseDropdownSelector(
                                 )
                             },
                             onClick = {
-                                selectedMuscleGroups =
+                                onMuscleGroupsChange(
                                     if (muscleGroup in selectedMuscleGroups) {
                                         selectedMuscleGroups - muscleGroup
                                     } else {
                                         selectedMuscleGroups + muscleGroup
                                     }
+                                )
                             }
                         )
                     }

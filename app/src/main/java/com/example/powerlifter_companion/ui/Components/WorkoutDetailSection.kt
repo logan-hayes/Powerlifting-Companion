@@ -3,15 +3,24 @@ package com.example.powerlifter_companion.ui.Components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.powerlifter_companion.entities.Exercise
+import com.example.powerlifter_companion.entities.ExerciseCategory
 import com.example.powerlifter_companion.entities.ExerciseDefinition
+import com.example.powerlifter_companion.entities.MuscleGroup
 import com.example.powerlifter_companion.ui.BlockTableHeader
 import com.example.powerlifter_companion.ui.BlockTableRow
 import com.example.powerlifter_companion.ui.Components.ExerciseDropdownSelector
@@ -38,10 +47,47 @@ fun WorkoutDetailSection(
     onNotesChange: (String) -> Unit,
     onStartAddExercise: () -> Unit,
     onCancelAddExercise: () -> Unit,
-    onAddExercise: () -> Unit
+    onAddExercise: () -> Unit,
+    onDeleteExercise: (Exercise) -> Unit,
+    onStartWorkout: () -> Unit,
 ) {
+    var showDeleteExerciseDialog by remember { mutableStateOf(false) }
+    var selectedCategories by remember { mutableStateOf(setOf<ExerciseCategory>()) }
+    var selectedMuscleGroups by remember { mutableStateOf(setOf<MuscleGroup>()) }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = onBackClick
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "",
+                tint = Color.White
+            )
+        }
+
+        Text(
+            text = "",
+            color = Color.White,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Text(
+        text = workoutName,
+        color = Color.White,
+        style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(modifier = Modifier.height(20.dp))
+
     Button(
-        onClick = onBackClick,
+        onClick = onStartWorkout,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
@@ -49,19 +95,10 @@ fun WorkoutDetailSection(
             contentColor = Color.White
         )
     ) {
-        Text("Back to Week")
+        Text("Start Workout")
     }
 
-    Spacer(modifier = Modifier.height(20.dp))
-
-    Text(
-        text = workoutName,
-        color = Color.White,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
+    Spacer(modifier = Modifier.height(16.dp))
 
     BlockTableHeader()
 
@@ -94,6 +131,22 @@ fun WorkoutDetailSection(
         ) {
             Text("+ Add Exercise")
         }
+
+        if (exercises.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { showDeleteExerciseDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.DarkGray,
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Delete Exercise")
+            }
+        }
     }
 
     if (isAddingExercise) {
@@ -109,6 +162,10 @@ fun WorkoutDetailSection(
         ExerciseDropdownSelector(
             exerciseDefinitions = exerciseDefinitions,
             selectedExerciseId = selectedExerciseId,
+            selectedCategories = selectedCategories,
+            selectedMuscleGroups = selectedMuscleGroups,
+            onCategoriesChange = { selectedCategories = it },
+            onMuscleGroupsChange = { selectedMuscleGroups = it },
             onExerciseSelected = onExerciseSelected
         )
 
@@ -180,5 +237,41 @@ fun WorkoutDetailSection(
         ) {
             Text("Cancel")
         }
+    }
+
+    if (showDeleteExerciseDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteExerciseDialog = false },
+            title = { Text("Delete Exercise") },
+            text = {
+                Column {
+                    exercises.forEach { exercise ->
+                        val exerciseName = exerciseDefinitions
+                            .firstOrNull { it.exerciseDefinitionID == exercise.exerciseDefinition }
+                            ?.name ?: "Unknown"
+
+                        Button(
+                            onClick = {
+                                onDeleteExercise(exercise)
+                                showDeleteExerciseDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(exerciseName)
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                Button(
+                    onClick = { showDeleteExerciseDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
