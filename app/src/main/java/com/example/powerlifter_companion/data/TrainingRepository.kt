@@ -1,16 +1,33 @@
 package com.example.powerlifter_companion.data
 
 import com.example.powerlifter_companion.entities.Exercise
+import com.example.powerlifter_companion.entities.ExerciseLog
+import com.example.powerlifter_companion.entities.ExerciseLogStatus
+import com.example.powerlifter_companion.entities.PostWorkout
 import com.example.powerlifter_companion.entities.TrainingBlocks
 import com.example.powerlifter_companion.entities.TrainingWeek
 import com.example.powerlifter_companion.entities.Workout
+
+// Input shape for completing a workout: one entry per exercise, carrying
+// what the user actually did (or that they skipped it). Kept in the data
+// layer so both the ViewModel and Repository share the same type.
+data class ExerciseLogInput(
+    val exerciseId: Int,
+    val status: ExerciseLogStatus,
+    val actualSets: Int?,
+    val actualReps: Int?,
+    val actualWeight: Int?,
+    val actualRpe: Float?
+)
 
 class TrainingRepository(
     private val trainingBlocksDao: TrainingBlocksDao,
     private val trainingWeekDao: TrainingWeekDao,
     private val workoutDao: WorkoutDao,
     private val exerciseDao: ExerciseDao,
-    private val exerciseDefinitionDao: ExerciseDefinitionDao
+    private val exerciseDefinitionDao: ExerciseDefinitionDao,
+    private val postWorkoutDao: PostWorkoutDao,
+    private val exerciseLogDao: ExerciseLogDao
 ) {
 
     // Block specific
@@ -107,4 +124,47 @@ class TrainingRepository(
 
     fun getExercisesInBlock(blockId: Long) =
         exerciseDao.getAllExercisesInBlock(blockId)
+
+    // Today's Workout completion flow: records one PostWorkout (workout-level
+    // summary) plus one ExerciseLog per exercise (what actually happened).
+    fun getPostWorkoutForWorkout(workoutId: Long) =
+        postWorkoutDao.getPostWorkoutByWorkoutId(workoutId)
+
+    fun getPostWorkoutsInBlock(blockId: Long) =
+        postWorkoutDao.getPostWorkoutsInBlock(blockId)
+
+    suspend fun recordWorkoutCompletion(
+        workoutId: Long,
+        userId: Long,
+        exerciseLogs: List<ExerciseLogInput>
+    ) {
+        // Overwrite any previous log for this workout rather than stacking a
+        // duplicate PostWorkout row (its ExerciseLog children cascade-delete).
+        postWorkoutDao.deletePostWorkoutForWorkout(workoutId)
+
+        val allAsPlanned = exerciseLogs.all { it.status == ExerciseLogStatus.COMPLETED_AS_PLANNED }
+
+        val postWorkoutId = postWorkoutDao.insertPostWorkout(
+            PostWorkout(
+                workoutId = workoutId,
+                userId = userId,
+                completedTimeStamp = System.currentTimeMillis(),
+                completedAsPlanned = allAsPlanned
+            )
+        )
+
+        exerciseLogDao.insertExerciseLogs(
+            exerciseLogs.map { input ->
+                ExerciseLog(
+                    postWorkoutId = postWorkoutId.toInt(),
+                    exerciseId = input.exerciseId,
+                    status = input.status,
+                    actualSets = input.actualSets,
+                    actualReps = input.actualReps,
+                    actualWeight = input.actualWeight,
+                    actualRpe = input.actualRpe
+                )
+            }
+        )
+    }
 }

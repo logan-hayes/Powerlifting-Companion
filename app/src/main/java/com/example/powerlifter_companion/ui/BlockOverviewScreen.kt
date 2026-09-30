@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -224,14 +226,23 @@ private fun WorkoutTableCard(
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    val postWorkout = workoutWithExercises.postWorkout
+    // Thin left-border accent, color-coded by completion status instead of
+    // full-row tinting: red = not logged yet, green = as planned, amber =
+    // logged with a modification or skip somewhere in the workout.
+    val accentColor = when {
+        postWorkout == null -> PrimaryRed
+        postWorkout.completedAsPlanned -> Color(0xFF4CAF50)
+        else -> Color(0xFFFFA726)
+    }
+
     Row(modifier = Modifier.fillMaxWidth()) {
-        // Thin left-border accent instead of full-row tinting
         Box(
             modifier = Modifier
                 .width(4.dp)
                 .fillMaxHeight()
                 .background(
-                    PrimaryRed,
+                    accentColor,
                     shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)
                 )
         )
@@ -255,12 +266,25 @@ private fun WorkoutTableCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = workoutWithExercises.workout.workoutName,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = workoutWithExercises.workout.workoutName,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        if (postWorkout != null) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = if (postWorkout.completedAsPlanned)
+                                    "Completed as planned" else "Completed with changes",
+                                tint = accentColor,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
 
                     Box {
                         IconButton(onClick = { menuExpanded = true }) {

@@ -82,6 +82,7 @@ fun blockUi(
     val rpe by trainingViewModel.exerciseRpe.collectAsState()
     val exerciseNotes by trainingViewModel.exerciseNotes.collectAsState()
     val isAddingWorkout by trainingViewModel.isAddingWorkout.collectAsState()
+    val postWorkoutForSelectedWorkout by trainingViewModel.postWorkoutForSelectedWorkout.collectAsState()
     val selectedWorkout = workouts.firstOrNull { it.workoutId == selectedWorkoutId }
     var isViewingCurrentWorkout by remember { mutableStateOf(false) }
     val isAddingExercise by trainingViewModel.isAddingExercise.collectAsState()
@@ -144,7 +145,11 @@ fun blockUi(
                         workoutName = selectedWorkout?.workoutName ?: "Current Workout",
                         exercises = exercises,
                         exerciseDefinitions = exerciseDefinitions,
-                        onCompleteWorkout = {
+                        existingPostWorkout = postWorkoutForSelectedWorkout,
+                        onCompleteWorkout = { logs ->
+                            selectedWorkout?.let { workout ->
+                                trainingViewModel.completeWorkout(workout.workoutId, logs)
+                            }
                             isViewingCurrentWorkout = false
                         }
                     )

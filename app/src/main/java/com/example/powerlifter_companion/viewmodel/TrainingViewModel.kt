@@ -3,8 +3,10 @@ package com.example.powerlifter_companion.viewmodel
 import android.R.attr.name
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.powerlifter_companion.data.ExerciseLogInput
 import com.example.powerlifter_companion.data.TrainingRepository
 import com.example.powerlifter_companion.entities.Exercise
+import com.example.powerlifter_companion.entities.PostWorkout
 import com.example.powerlifter_companion.entities.TrainingBlocks
 import com.example.powerlifter_companion.entities.TrainingWeek
 import com.example.powerlifter_companion.entities.Workout
@@ -111,7 +113,8 @@ class TrainingViewModel(
     // selected block instead of separate week/workout selection flows.
     data class WorkoutWithExercises(
         val workout: Workout,
-        val exercises: List<Exercise>
+        val exercises: List<Exercise>,
+        val postWorkout: PostWorkout?
     )
 
     data class WeekWithWorkouts(
@@ -126,8 +129,9 @@ class TrainingViewModel(
                 combine(
                     trainingRepository.getWeeksInBlock(blockId),
                     trainingRepository.getWorkoutsInBlock(blockId),
-                    trainingRepository.getExercisesInBlock(blockId)
-                ) { weeks, workouts, exercises ->
+                    trainingRepository.getExercisesInBlock(blockId),
+                    trainingRepository.getPostWorkoutsInBlock(blockId)
+                ) { weeks, workouts, exercises, postWorkouts ->
                     weeks.sortedBy { it.weekNumber }.map { week ->
                         val weekWorkouts = workouts
                             .filter { it.trainingWeekId == week.trainingWeekId }
@@ -135,7 +139,8 @@ class TrainingViewModel(
                             .map { workout ->
                                 WorkoutWithExercises(
                                     workout = workout,
-                                    exercises = exercises.filter { it.workoutId == workout.workoutId }
+                                    exercises = exercises.filter { it.workoutId == workout.workoutId },
+                                    postWorkout = postWorkouts.firstOrNull { it.workoutId == workout.workoutId }
                                 )
                             }
                         WeekWithWorkouts(week = week, workouts = weekWorkouts)
@@ -146,6 +151,19 @@ class TrainingViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
+            )
+
+    // Drives the completed-summary vs entry-form choice in CurrentWorkoutScreen.
+    val postWorkoutForSelectedWorkout: StateFlow<PostWorkout?> =
+        _selectedWorkoutId
+            .filterNotNull()
+            .flatMapLatest { workoutId ->
+                trainingRepository.getPostWorkoutForWorkout(workoutId)
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null
             )
 
     //Block Specific//
@@ -398,6 +416,18 @@ class TrainingViewModel(
     fun seedExercises() {
         viewModelScope.launch {
             trainingRepository.seedExercisesIfEmpty()
+        }
+    }
+
+    //Today's Workout completion flow//
+
+    fun completeWorkout(workoutId: Long, exerciseLogs: List<ExerciseLogInput>) {
+        viewModelScope.launch {
+            trainingRepository.recordWorkoutCompletion(
+                workoutId = workoutId,
+                userId = 1L,
+                exerciseLogs = exerciseLogs
+            )
         }
     }
 
