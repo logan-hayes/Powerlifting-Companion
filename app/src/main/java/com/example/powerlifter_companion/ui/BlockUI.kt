@@ -65,6 +65,7 @@ fun blockUi(
     val blockLength by trainingViewModel.blockLength.collectAsState()
     val weeks by trainingViewModel.trainingWeeksInBlock.collectAsState(initial = emptyList())
     val workouts by trainingViewModel.workoutsInTrainingWeek.collectAsState(initial = emptyList())
+    val blockOverview by trainingViewModel.blockOverview.collectAsState()
     val workoutName by trainingViewModel.workoutName.collectAsState()
     val workoutNotes by trainingViewModel.workoutNotes.collectAsState()
     val selectedBlockId by trainingViewModel.selectedBlockId.collectAsState()
@@ -92,13 +93,13 @@ fun blockUi(
         modifier = Modifier
             .fillMaxSize()
             .background(gradient)
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .then(if (selectedBlockId == null || isAddingWorkout) Modifier.padding(16.dp) else Modifier)
+            .then(if (selectedBlockId == null || isAddingWorkout) Modifier.verticalScroll(rememberScrollState()) else Modifier),
         verticalArrangement = Arrangement.Top
     ) {
-        Spacer(modifier = Modifier.height(6.dp))
-
         if (selectedBlockId == null) {
+            Spacer(modifier = Modifier.height(6.dp))
+
             BlockListSection(
                 blocks = blocks,
                 blockName = blockName,
@@ -110,32 +111,33 @@ fun blockUi(
             )
         } else {
             if (selectedWorkoutId == null) {
-                SelectedBlockSection(
-                    weeks = weeks,
-                    workouts = workouts,
-                    workoutName = workoutName,
-                    workoutNotes = workoutNotes,
-                    selectedWeekId = selectedWeekId,
-                    isAddingWorkout = isAddingWorkout,
-                    onBackClick = { trainingViewModel.clearSelectedBlock() },
-                    onWeekSelected = { trainingViewModel.selectTrainingWeek(it) },
-                    onWorkoutSelected = { trainingViewModel.selectWorkout(it) },
-                    onWorkoutNumberSelected = {
-                        trainingViewModel.selectWorkoutNumberInWeek(it)
-                    },
-                    onAddWorkoutClick = {
-                        trainingViewModel.selectWorkoutNumberInWeek(workouts.size + 1)
-                        trainingViewModel.startAddingWorkout()
-                    },
-                    onCancelAddWorkout = {
-                        trainingViewModel.cancelAddingWorkout()
-                    },
-                    onWorkoutNameChange = { trainingViewModel.updateWorkoutName(it) },
-                    onWorkoutNotesChange = { trainingViewModel.updateWorkoutNotes(it) },
-                    onCreateWorkout = { trainingViewModel.createWorkout() },
-                    onDeleteWorkout = { trainingViewModel.deleteWorkout(it) },
-                    onDeleteWeek = { trainingViewModel.deleteTrainingWeek(it) }
-                )
+                if (isAddingWorkout) {
+                    AddWorkoutForm(
+                        weekLabel = weeks.firstOrNull { it.trainingWeekId == selectedWeekId }
+                            ?.let { "Week ${it.weekNumber}" } ?: "New Workout",
+                        workoutName = workoutName,
+                        workoutNotes = workoutNotes,
+                        onWorkoutNameChange = { trainingViewModel.updateWorkoutName(it) },
+                        onWorkoutNotesChange = { trainingViewModel.updateWorkoutNotes(it) },
+                        onCreateWorkout = { trainingViewModel.createWorkout() },
+                        onCancelAddWorkout = { trainingViewModel.cancelAddingWorkout() }
+                    )
+                } else {
+                    BlockOverviewScreen(
+                        blockName = blocks.firstOrNull { it.blockId == selectedBlockId }?.blockName
+                            ?: "Training Block",
+                        overview = blockOverview,
+                        exerciseDefinitions = exerciseDefinitions,
+                        onBackClick = { trainingViewModel.clearSelectedBlock() },
+                        onWorkoutClick = { trainingViewModel.selectWorkout(it.workoutId) },
+                        onAddWorkoutClick = { weekId, currentWorkoutCount ->
+                            trainingViewModel.selectTrainingWeek(weekId)
+                            trainingViewModel.selectWorkoutNumberInWeek(currentWorkoutCount + 1)
+                            trainingViewModel.startAddingWorkout()
+                        },
+                        onDeleteWorkout = { trainingViewModel.deleteWorkout(it) }
+                    )
+                }
             } else {
                 if (isViewingCurrentWorkout) {
                     CurrentWorkoutScreen(
@@ -178,6 +180,74 @@ fun blockUi(
         }
     }
 }
+
+@Composable
+fun AddWorkoutForm(
+    weekLabel: String,
+    workoutName: String,
+    workoutNotes: String,
+    onWorkoutNameChange: (String) -> Unit,
+    onWorkoutNotesChange: (String) -> Unit,
+    onCreateWorkout: () -> Unit,
+    onCancelAddWorkout: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Add Workout — $weekLabel",
+            color = Color.White,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = workoutName,
+            onValueChange = onWorkoutNameChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Workout name") },
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = workoutNotes,
+            onValueChange = onWorkoutNotesChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Workout notes") }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = onCreateWorkout,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = PrimaryRed,
+                contentColor = Color.White
+            )
+        ) {
+            Text("Save Workout")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = onCancelAddWorkout,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.DarkGray,
+                contentColor = Color.White
+            )
+        ) {
+            Text("Cancel")
+        }
+    }
+}
+
 @Composable
 fun BlockListSection(
     blocks: List<TrainingBlocks>,

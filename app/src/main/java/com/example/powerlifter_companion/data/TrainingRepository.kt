@@ -98,4 +98,13 @@ class TrainingRepository(
             )
         }
     }
+
+    // Block overview (continuous-scroll redesign): block-scoped reads so the
+    // ViewModel can build one nested Week -> Workout -> Exercise structure
+    // instead of requiring a week/workout to be selected first.
+    fun getWorkoutsInBlock(blockId: Long) =
+        workoutDao.getAllWorkoutsInBlock(blockId)
+
+    fun getExercisesInBlock(blockId: Long) =
+        exerciseDao.getAllExercisesInBlock(blockId)
 }

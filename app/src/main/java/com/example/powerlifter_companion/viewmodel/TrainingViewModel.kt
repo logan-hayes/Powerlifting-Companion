@@ -9,9 +9,12 @@ import com.example.powerlifter_companion.entities.TrainingBlocks
 import com.example.powerlifter_companion.entities.TrainingWeek
 import com.example.powerlifter_companion.entities.Workout
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class TrainingViewModel(
@@ -103,6 +106,48 @@ class TrainingViewModel(
             .flatMapLatest { blockId ->
                 trainingRepository.getWeeksInBlock(blockId)
             }
+
+    // Block overview (continuous-scroll redesign): one nested structure per
+    // selected block instead of separate week/workout selection flows.
+    data class WorkoutWithExercises(
+        val workout: Workout,
+        val exercises: List<Exercise>
+    )
+
+    data class WeekWithWorkouts(
+        val week: TrainingWeek,
+        val workouts: List<WorkoutWithExercises>
+    )
+
+    val blockOverview: StateFlow<List<WeekWithWorkouts>> =
+        _selectedBlockId
+            .filterNotNull()
+            .flatMapLatest { blockId ->
+                combine(
+                    trainingRepository.getWeeksInBlock(blockId),
+                    trainingRepository.getWorkoutsInBlock(blockId),
+                    trainingRepository.getExercisesInBlock(blockId)
+                ) { weeks, workouts, exercises ->
+                    weeks.sortedBy { it.weekNumber }.map { week ->
+                        val weekWorkouts = workouts
+                            .filter { it.trainingWeekId == week.trainingWeekId }
+                            .sortedBy { it.dayNumber }
+                            .map { workout ->
+                                WorkoutWithExercises(
+                                    workout = workout,
+                                    exercises = exercises.filter { it.workoutId == workout.workoutId }
+                                )
+                            }
+                        WeekWithWorkouts(week = week, workouts = weekWorkouts)
+                    }
+                }
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
     //Block Specific//
 
     fun selectTrainingBlock(blockId: Long) {

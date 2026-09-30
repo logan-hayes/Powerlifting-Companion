@@ -38,4 +38,16 @@ interface ExerciseDao {
 
     @Query("SELECT * FROM exercise WHERE exerciseId = :exerciseId")
     fun getExerciseById(exerciseId: Long): Flow<Exercise?>
+
+    // Added for the block overview redesign: every exercise in a block, joined
+    // through workout -> training_week since Exercise only stores workout_id.
+    @Query(
+        """
+        SELECT exercise.* FROM exercise
+        INNER JOIN workout ON exercise.workout_id = workout.workout_id
+        INNER JOIN training_week ON workout.training_week_id = training_week.training_week_id
+        WHERE training_week.block_id = :blockId
+        """
+    )
+    fun getAllExercisesInBlock(blockId: Long): Flow<List<Exercise>>
 }

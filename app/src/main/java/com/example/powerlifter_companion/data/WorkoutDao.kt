@@ -26,4 +26,16 @@ interface WorkoutDao {
 
     @Query("SELECT * FROM workout WHERE workout_id = :workoutId")
     fun getWorkoutById(workoutId: Long): Flow<Workout?>
+
+    // Added for the block overview redesign: every workout in a block, joined
+    // through training_week since Workout only stores training_week_id.
+    @Query(
+        """
+        SELECT workout.* FROM workout
+        INNER JOIN training_week ON workout.training_week_id = training_week.training_week_id
+        WHERE training_week.block_id = :blockId
+        ORDER BY training_week.week_number ASC, workout.day_number ASC
+        """
+    )
+    fun getAllWorkoutsInBlock(blockId: Long): Flow<List<Workout>>
 }
