@@ -1,5 +1,7 @@
 package com.example.powerlifter_companion.data
 
+import com.example.powerlifter_companion.entities.BodyMetricLog
+import com.example.powerlifter_companion.entities.BodyMetricType
 import com.example.powerlifter_companion.entities.Exercise
 import com.example.powerlifter_companion.entities.ExerciseLog
 import com.example.powerlifter_companion.entities.ExerciseLogStatus
@@ -29,7 +31,8 @@ class TrainingRepository(
     private val exerciseDefinitionDao: ExerciseDefinitionDao,
     private val postWorkoutDao: PostWorkoutDao,
     private val exerciseLogDao: ExerciseLogDao,
-    private val usersDao: UsersDao
+    private val usersDao: UsersDao,
+    private val bodyMetricLogDao: BodyMetricLogDao
 ) {
 
     // Block specific
@@ -184,4 +187,48 @@ class TrainingRepository(
             }
         )
     }
+
+    // Body metric history (bodyweight + per-lift estimated 1RM). Each call
+    // adds a new row rather than overwriting — that's the whole point versus
+    // the old single-value approach.
+    suspend fun logBodyweight(userId: Long, value: Float, notes: String? = null) {
+        bodyMetricLogDao.insertBodyMetricLog(
+            BodyMetricLog(
+                userId = userId,
+                metricType = BodyMetricType.BODYWEIGHT,
+                exerciseDefinitionId = null,
+                value = value,
+                notes = notes
+            )
+        )
+    }
+
+    suspend fun logEstimatedOneRepMax(
+        userId: Long,
+        exerciseDefinitionId: Int,
+        value: Float,
+        notes: String? = null
+    ) {
+        bodyMetricLogDao.insertBodyMetricLog(
+            BodyMetricLog(
+                userId = userId,
+                metricType = BodyMetricType.ESTIMATED_ONE_REP_MAX,
+                exerciseDefinitionId = exerciseDefinitionId,
+                value = value,
+                notes = notes
+            )
+        )
+    }
+
+    fun getBodyweightHistory(userId: Long) =
+        bodyMetricLogDao.getMetricHistory(userId, BodyMetricType.BODYWEIGHT)
+
+    fun getOneRepMaxHistory(userId: Long, exerciseDefinitionId: Int) =
+        bodyMetricLogDao.getOneRepMaxHistory(userId, exerciseDefinitionId)
+
+    suspend fun getLatestBodyweight(userId: Long) =
+        bodyMetricLogDao.getLatestMetric(userId, BodyMetricType.BODYWEIGHT)
+
+    suspend fun getLatestOneRepMax(userId: Long, exerciseDefinitionId: Int) =
+        bodyMetricLogDao.getLatestOneRepMax(userId, exerciseDefinitionId)
 }

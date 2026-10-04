@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.example.powerlifter_companion.entities.ExerciseCategory
 import com.example.powerlifter_companion.entities.MuscleGroup
 import com.example.powerlifter_companion.entities.ExerciseLogStatus
+import com.example.powerlifter_companion.entities.BodyMetricType
 
 
 /**
@@ -40,5 +41,15 @@ class Converters {
     @TypeConverter
     fun toExerciseLogStatus(value: String): ExerciseLogStatus {
         return ExerciseLogStatus.valueOf(value)
+    }
+
+    @TypeConverter
+    fun fromBodyMetricType(value: BodyMetricType): String {
+        return value.name
+    }
+
+    @TypeConverter
+    fun toBodyMetricType(value: String): BodyMetricType {
+        return BodyMetricType.valueOf(value)
     }
 }

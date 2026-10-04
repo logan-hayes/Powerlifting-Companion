@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.powerlifter_companion.data.ExerciseLogInput
 import com.example.powerlifter_companion.data.TrainingRepository
+import com.example.powerlifter_companion.entities.BodyMetricLog
 import com.example.powerlifter_companion.entities.Exercise
 import com.example.powerlifter_companion.entities.ExerciseLogStatus
 import com.example.powerlifter_companion.entities.PostWorkout
@@ -459,5 +460,38 @@ class TrainingViewModel(
             )
         }
     }
+
+    //Body metric history (bodyweight + per-lift estimated 1RM)//
+
+    val bodyweightHistory: StateFlow<List<BodyMetricLog>> =
+        trainingRepository.getBodyweightHistory(1L)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    fun logBodyweight(value: Float, notes: String? = null) {
+        viewModelScope.launch {
+            trainingRepository.logBodyweight(userId = 1L, value = value, notes = notes)
+        }
+    }
+
+    fun logEstimatedOneRepMax(exerciseDefinitionId: Int, value: Float, notes: String? = null) {
+        viewModelScope.launch {
+            trainingRepository.logEstimatedOneRepMax(
+                userId = 1L,
+                exerciseDefinitionId = exerciseDefinitionId,
+                value = value,
+                notes = notes
+            )
+        }
+    }
+
+    // Per-lift history isn't a single app-wide StateFlow since which lift is
+    // being viewed is a UI concern (e.g. a lift picker on the Performance
+    // screen) — call this with whichever exerciseDefinitionId is selected.
+    fun getOneRepMaxHistory(exerciseDefinitionId: Int) =
+        trainingRepository.getOneRepMaxHistory(1L, exerciseDefinitionId)
 
 }

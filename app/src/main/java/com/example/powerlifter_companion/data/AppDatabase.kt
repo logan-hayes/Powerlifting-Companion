@@ -15,6 +15,7 @@ import com.example.powerlifter_companion.entities.TrainingWeek
 import com.example.powerlifter_companion.entities.Workout
 import com.example.powerlifter_companion.entities.PostWorkout
 import com.example.powerlifter_companion.entities.ExerciseLog
+import com.example.powerlifter_companion.entities.BodyMetricLog
 
 @Database(
     entities = [
@@ -26,9 +27,10 @@ import com.example.powerlifter_companion.entities.ExerciseLog
         PostWorkout::class,
         ExerciseDefinition::class,
         Exercise::class,
-        ExerciseLog::class
+        ExerciseLog::class,
+        BodyMetricLog::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -43,6 +45,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userSettingsDao(): UserSettingsDao
     abstract fun postWorkoutDao(): PostWorkoutDao
     abstract fun exerciseLogDao(): ExerciseLogDao
+    abstract fun bodyMetricLogDao(): BodyMetricLogDao
 
     companion object {
         @Volatile

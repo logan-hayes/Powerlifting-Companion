@@ -38,7 +38,8 @@ fun Scaffolding() {
                 exerciseDefinitionDao = db.exerciseDefinitionDao(),
                 postWorkoutDao = db.postWorkoutDao(),
                 exerciseLogDao = db.exerciseLogDao(),
-                usersDao = db.usersDao()
+                usersDao = db.usersDao(),
+                bodyMetricLogDao = db.bodyMetricLogDao()
             )
         )
     }
