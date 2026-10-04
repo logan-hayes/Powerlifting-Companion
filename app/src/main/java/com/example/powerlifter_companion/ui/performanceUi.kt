@@ -30,6 +30,7 @@ import com.example.powerlifter_companion.ui.theme.BackgroundGray
 import com.example.powerlifter_companion.ui.theme.PrimaryRed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import com.example.powerlifter_companion.viewmodel.TrainingViewModel
 
 /**
  * @author Logan Hayes
@@ -57,7 +58,7 @@ fun PerformanceHeader(){
 }
 
 @Composable
-fun PerformanceUi(){
+fun PerformanceUi(trainingViewModel: TrainingViewModel){
     val gradientBlack = Brush.verticalGradient(
         colors = listOf(
             BackgroundGray,

@@ -79,7 +79,7 @@ fun Scaffolding() {
                         selectedIndex.value = 2
                     }
                 )
-                1 -> PerformanceUi()
+                1 -> PerformanceUi(trainingViewModel)
                 2 -> blockUi(trainingViewModel)
                 3 -> profileUi()
             }
