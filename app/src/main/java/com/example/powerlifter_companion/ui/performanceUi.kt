@@ -22,6 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -59,6 +61,9 @@ fun PerformanceHeader(){
 
 @Composable
 fun PerformanceUi(trainingViewModel: TrainingViewModel){
+
+    val bodyweightHistory by trainingViewModel.bodyweightHistory.collectAsState()
+    val latestBodyweight = bodyweightHistory.lastOrNull()?.value
     val gradientBlack = Brush.verticalGradient(
         colors = listOf(
             BackgroundGray,
@@ -93,6 +98,14 @@ fun PerformanceUi(trainingViewModel: TrainingViewModel){
 
         Spacer(modifier = Modifier.height(16.dp))
         StrengthTrendCard()
+        Spacer(modifier = Modifier.height(16.dp))
+
+        StrengthSummaryCard(
+            modifier = Modifier.fillMaxWidth(),
+            title = "Bodyweight",
+            value = latestBodyweight?.toString() ?: "No entries yet"
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
