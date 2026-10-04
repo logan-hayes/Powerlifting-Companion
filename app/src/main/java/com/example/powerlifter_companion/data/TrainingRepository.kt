@@ -6,6 +6,7 @@ import com.example.powerlifter_companion.entities.ExerciseLogStatus
 import com.example.powerlifter_companion.entities.PostWorkout
 import com.example.powerlifter_companion.entities.TrainingBlocks
 import com.example.powerlifter_companion.entities.TrainingWeek
+import com.example.powerlifter_companion.entities.Users
 import com.example.powerlifter_companion.entities.Workout
 
 // Input shape for completing a workout: one entry per exercise, carrying
@@ -27,7 +28,8 @@ class TrainingRepository(
     private val exerciseDao: ExerciseDao,
     private val exerciseDefinitionDao: ExerciseDefinitionDao,
     private val postWorkoutDao: PostWorkoutDao,
-    private val exerciseLogDao: ExerciseLogDao
+    private val exerciseLogDao: ExerciseLogDao,
+    private val usersDao: UsersDao
 ) {
 
     // Block specific
@@ -113,6 +115,17 @@ class TrainingRepository(
             exerciseDefinitionDao.insertExerciseDefinitionList(
                 ExerciseSeedData.defaultExercises
             )
+        }
+    }
+
+    // The whole app hardcodes userId = 1L (block creation, workout
+    // completion, ...) but nothing ever created that row, so any insert with
+    // an enforced foreign key to users (PostWorkout) throws a
+    // SQLiteConstraintException the first time it actually runs. Seed it the
+    // same way the exercise definitions are seeded.
+    suspend fun seedDefaultUserIfMissing() {
+        if (usersDao.getUserById(1L) == null) {
+            usersDao.insertUser(Users(userId = 1L, name = "Default User", email = null))
         }
     }
 

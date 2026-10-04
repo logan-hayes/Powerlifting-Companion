@@ -37,12 +37,18 @@ fun Scaffolding() {
                 exerciseDao = db.exerciseDao(),
                 exerciseDefinitionDao = db.exerciseDefinitionDao(),
                 postWorkoutDao = db.postWorkoutDao(),
-                exerciseLogDao = db.exerciseLogDao()
+                exerciseLogDao = db.exerciseLogDao(),
+                usersDao = db.usersDao()
             )
         )
     }
     LaunchedEffect(Unit) {
         trainingViewModel.seedExercises()
+        // Every hardcoded userId = 1L write (training blocks, workout
+        // completions) assumes this row exists; nothing ever created it
+        // before, which is why completing a workout crashed with a foreign
+        // key constraint failure the first time that insert actually ran.
+        trainingViewModel.seedDefaultUser()
     }
 
     val selectedIndex = remember { mutableStateOf(0) }

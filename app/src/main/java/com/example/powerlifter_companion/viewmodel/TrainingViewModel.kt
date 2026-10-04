@@ -436,6 +436,12 @@ class TrainingViewModel(
         }
     }
 
+    fun seedDefaultUser() {
+        viewModelScope.launch {
+            trainingRepository.seedDefaultUserIfMissing()
+        }
+    }
+
     //Today's Workout completion flow//
 
     fun completeWorkout(workoutId: Long, exerciseLogs: List<ExerciseLogInput>) {
