@@ -35,7 +35,9 @@ fun Scaffolding() {
                 trainingWeekDao = db.trainingWeekDao(),
                 workoutDao = db.workoutDao(),
                 exerciseDao = db.exerciseDao(),
-                exerciseDefinitionDao = db.exerciseDefinitionDao()
+                exerciseDefinitionDao = db.exerciseDefinitionDao(),
+                postWorkoutDao = db.postWorkoutDao(),
+                exerciseLogDao = db.exerciseLogDao()
             )
         )
     }
