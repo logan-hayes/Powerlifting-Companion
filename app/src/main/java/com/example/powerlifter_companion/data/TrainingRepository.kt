@@ -149,20 +149,24 @@ class TrainingRepository(
     suspend fun recordWorkoutCompletion(
         workoutId: Long,
         userId: Long,
-        exerciseLogs: List<ExerciseLogInput>
+        exerciseLogs: List<ExerciseLogInput>,
+        overallStatus: ExerciseLogStatus
     ) {
         // Overwrite any previous log for this workout rather than stacking a
         // duplicate PostWorkout row (its ExerciseLog children cascade-delete).
         postWorkoutDao.deletePostWorkoutForWorkout(workoutId)
 
-        val allAsPlanned = exerciseLogs.all { it.status == ExerciseLogStatus.COMPLETED_AS_PLANNED }
+        // Passed in explicitly rather than derived from exerciseLogs.all { ... },
+        // since that was vacuously true for a workout with zero exercises —
+        // every empty-exercise completion silently recorded as "as planned."
+        val completedAsPlanned = overallStatus == ExerciseLogStatus.COMPLETED_AS_PLANNED
 
         val postWorkoutId = postWorkoutDao.insertPostWorkout(
             PostWorkout(
                 workoutId = workoutId,
                 userId = userId,
                 completedTimeStamp = System.currentTimeMillis(),
-                completedAsPlanned = allAsPlanned
+                completedAsPlanned = completedAsPlanned
             )
         )
 

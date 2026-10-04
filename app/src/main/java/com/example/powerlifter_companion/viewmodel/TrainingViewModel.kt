@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.powerlifter_companion.data.ExerciseLogInput
 import com.example.powerlifter_companion.data.TrainingRepository
 import com.example.powerlifter_companion.entities.Exercise
+import com.example.powerlifter_companion.entities.ExerciseLogStatus
 import com.example.powerlifter_companion.entities.PostWorkout
 import com.example.powerlifter_companion.entities.TrainingBlocks
 import com.example.powerlifter_companion.entities.TrainingWeek
@@ -444,12 +445,17 @@ class TrainingViewModel(
 
     //Today's Workout completion flow//
 
-    fun completeWorkout(workoutId: Long, exerciseLogs: List<ExerciseLogInput>) {
+    fun completeWorkout(
+        workoutId: Long,
+        exerciseLogs: List<ExerciseLogInput>,
+        overallStatus: ExerciseLogStatus
+    ) {
         viewModelScope.launch {
             trainingRepository.recordWorkoutCompletion(
                 workoutId = workoutId,
                 userId = 1L,
-                exerciseLogs = exerciseLogs
+                exerciseLogs = exerciseLogs,
+                overallStatus = overallStatus
             )
         }
     }

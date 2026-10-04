@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -69,7 +71,8 @@ fun CurrentWorkoutScreen(
     exercises: List<Exercise>,
     exerciseDefinitions: List<ExerciseDefinition>,
     existingPostWorkout: PostWorkout?,
-    onCompleteWorkout: (List<ExerciseLogInput>) -> Unit
+    onBackClick: () -> Unit,
+    onCompleteWorkout: (List<ExerciseLogInput>, ExerciseLogStatus) -> Unit
 ) {
     val gradient = Brush.verticalGradient(
         colors = listOf(BackgroundGray, PrimaryRed)
@@ -80,6 +83,10 @@ fun CurrentWorkoutScreen(
     // already-logged workout shows the summary again by default.
     var isEditing by remember(existingPostWorkout == null) { mutableStateOf(existingPostWorkout == null) }
     val entryStates = remember { mutableStateMapOf<Int, ExerciseEntryState>() }
+    // Used only when the workout has no exercises to log individually —
+    // otherwise there'd be nothing to pick from and "Complete Workout" would
+    // silently default to As Planned (what it did before this was added).
+    var workoutLevelStatus by remember { mutableStateOf(ExerciseLogStatus.COMPLETED_AS_PLANNED) }
 
     Column(
         modifier = Modifier
@@ -88,12 +95,21 @@ fun CurrentWorkoutScreen(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Text(
-            text = workoutName,
-            color = Color.White,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
+            }
+            Text(
+                text = workoutName,
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -134,6 +150,40 @@ fun CurrentWorkoutScreen(
             Spacer(modifier = Modifier.height(10.dp))
         }
 
+        if (exercises.isEmpty()) {
+            Text(
+                text = "No exercises added to this workout. Mark how it went overall:",
+                color = Color.White.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                StatusChip(
+                    label = "As Planned",
+                    selected = workoutLevelStatus == ExerciseLogStatus.COMPLETED_AS_PLANNED,
+                    onClick = { workoutLevelStatus = ExerciseLogStatus.COMPLETED_AS_PLANNED },
+                    modifier = Modifier.weight(1f)
+                )
+                StatusChip(
+                    label = "Modified",
+                    selected = workoutLevelStatus == ExerciseLogStatus.MODIFIED,
+                    onClick = { workoutLevelStatus = ExerciseLogStatus.MODIFIED },
+                    modifier = Modifier.weight(1f)
+                )
+                StatusChip(
+                    label = "Skipped",
+                    selected = workoutLevelStatus == ExerciseLogStatus.SKIPPED,
+                    onClick = { workoutLevelStatus = ExerciseLogStatus.SKIPPED },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
@@ -154,7 +204,12 @@ fun CurrentWorkoutScreen(
                             else exercise.rpe
                     )
                 }
-                onCompleteWorkout(logs)
+                val overallStatus = when {
+                    exercises.isEmpty() -> workoutLevelStatus
+                    logs.all { it.status == ExerciseLogStatus.COMPLETED_AS_PLANNED } -> ExerciseLogStatus.COMPLETED_AS_PLANNED
+                    else -> ExerciseLogStatus.MODIFIED
+                }
+                onCompleteWorkout(logs, overallStatus)
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),

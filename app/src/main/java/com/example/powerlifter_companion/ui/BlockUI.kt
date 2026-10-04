@@ -149,9 +149,10 @@ fun blockUi(
                         exercises = exercises,
                         exerciseDefinitions = exerciseDefinitions,
                         existingPostWorkout = postWorkoutForSelectedWorkout,
-                        onCompleteWorkout = { logs ->
+                        onBackClick = { isViewingCurrentWorkout = false },
+                        onCompleteWorkout = { logs, overallStatus ->
                             selectedWorkout?.let { workout ->
-                                trainingViewModel.completeWorkout(workout.workoutId, logs)
+                                trainingViewModel.completeWorkout(workout.workoutId, logs, overallStatus)
                             }
                             isViewingCurrentWorkout = false
                         }
