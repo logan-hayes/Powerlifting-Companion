@@ -153,6 +153,23 @@ class TrainingViewModel(
                 initialValue = emptyList()
             )
 
+    // Looked up by workoutId directly so it resolves correctly when a workout
+    // is selected from the block overview (which never sets the training
+    // week, so the old `workoutsInTrainingWeek.firstOrNull { ... }` lookup in
+    // BlockUI always came back null there — silently dropping every
+    // completion, since onCompleteWorkout's `selectedWorkout?.let { }` never ran).
+    val selectedWorkout: StateFlow<Workout?> =
+        _selectedWorkoutId
+            .filterNotNull()
+            .flatMapLatest { workoutId ->
+                trainingRepository.getWorkoutById(workoutId)
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null
+            )
+
     // Drives the completed-summary vs entry-form choice in CurrentWorkoutScreen.
     val postWorkoutForSelectedWorkout: StateFlow<PostWorkout?> =
         _selectedWorkoutId

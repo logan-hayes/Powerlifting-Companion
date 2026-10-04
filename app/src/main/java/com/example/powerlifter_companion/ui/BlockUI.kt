@@ -83,7 +83,10 @@ fun blockUi(
     val exerciseNotes by trainingViewModel.exerciseNotes.collectAsState()
     val isAddingWorkout by trainingViewModel.isAddingWorkout.collectAsState()
     val postWorkoutForSelectedWorkout by trainingViewModel.postWorkoutForSelectedWorkout.collectAsState()
-    val selectedWorkout = workouts.firstOrNull { it.workoutId == selectedWorkoutId }
+    // Looked up directly by id (not via workoutsInTrainingWeek, which stays
+    // empty when a workout is opened from the block overview, since that
+    // flow never selects a training week) — see TrainingViewModel for why.
+    val selectedWorkout by trainingViewModel.selectedWorkout.collectAsState()
     var isViewingCurrentWorkout by remember { mutableStateOf(false) }
     val isAddingExercise by trainingViewModel.isAddingExercise.collectAsState()
     val gradient = Brush.verticalGradient(
