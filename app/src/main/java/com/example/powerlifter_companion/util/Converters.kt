@@ -3,6 +3,7 @@ package com.example.powerlifter_companion.util
 import androidx.room.TypeConverter
 import com.example.powerlifter_companion.entities.ExerciseCategory
 import com.example.powerlifter_companion.entities.MuscleGroup
+import com.example.powerlifter_companion.entities.ExerciseLogStatus
 
 
 /**
@@ -29,5 +30,15 @@ class Converters {
     @TypeConverter
     fun toMuscleGroup(value: String): MuscleGroup{
         return MuscleGroup.valueOf(value)
+    }
+
+    @TypeConverter
+    fun fromExerciseLogStatus(value: ExerciseLogStatus): String {
+        return value.name
+    }
+
+    @TypeConverter
+    fun toExerciseLogStatus(value: String): ExerciseLogStatus {
+        return ExerciseLogStatus.valueOf(value)
     }
 }
